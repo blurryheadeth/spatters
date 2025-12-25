@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "DateTime",
+  "sourceName": "contracts/DateTime.sol",
+  "abi": [],
+  "bytecode": "0x6080806040523460175760399081601c823930815050f35b5f80fdfe5f80fdfea2646970667358221220fe7eb5799003dd8e26da9693051a054bb2bac333e66f77131838ac78ed74ad2064736f6c63430008180033",
+  "deployedBytecode": "0x5f80fdfea2646970667358221220fe7eb5799003dd8e26da9693051a054bb2bac333e66f77131838ac78ed74ad2064736f6c63430008180033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
