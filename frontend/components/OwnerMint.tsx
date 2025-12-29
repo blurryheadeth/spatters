@@ -135,6 +135,7 @@ export default function OwnerMint() {
     address: contractAddress as `0x${string}`,
     abi: SpattersABI.abi,
     functionName: 'totalSupply',
+    query: { staleTime: 0 }, // Always fetch fresh data
   });
 
   // Read owner reserve
@@ -157,6 +158,7 @@ export default function OwnerMint() {
     abi: SpattersABI.abi,
     functionName: 'getPendingRequest',
     args: [],  // No address param needed - single global request
+    query: { staleTime: 0 }, // Always fetch fresh data
   });
 
   // Read pending palette (single global palette, since only one mint can be active at a time)
@@ -171,6 +173,7 @@ export default function OwnerMint() {
     contracts: pendingPaletteCalls,
     query: {
       enabled: !!contractAddress,
+      staleTime: 0, // Always fetch fresh data
     },
   });
 
@@ -180,6 +183,7 @@ export default function OwnerMint() {
     address: contractAddress as `0x${string}`,
     abi: SpattersABI.abi,
     functionName: 'isMintSelectionInProgress',
+    query: { staleTime: 0 }, // Always fetch fresh data
   });
 
   // Extract values from the tuple

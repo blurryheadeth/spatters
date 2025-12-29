@@ -62,6 +62,7 @@ export default function PublicMint() {
     address: contractAddress as `0x${string}`,
     abi: SpattersABI.abi,
     functionName: 'totalSupply',
+    query: { staleTime: 0 }, // Always fetch fresh data
   });
 
   // Read max supply
@@ -84,6 +85,7 @@ export default function PublicMint() {
     abi: SpattersABI.abi,
     functionName: 'getPendingRequest',
     args: [],  // No address param needed - single global request
+    query: { staleTime: 0 }, // Always fetch fresh data
   });
 
   // Check if any mint selection is in progress (global block)
@@ -92,6 +94,7 @@ export default function PublicMint() {
     address: contractAddress as `0x${string}`,
     abi: SpattersABI.abi,
     functionName: 'isMintSelectionInProgress',
+    query: { staleTime: 0 }, // Always fetch fresh data
   });
 
   // Extract values from the tuple
@@ -104,6 +107,7 @@ export default function PublicMint() {
     address: contractAddress as `0x${string}`,
     abi: SpattersABI.abi,
     functionName: 'lastGlobalMintTime',
+    query: { staleTime: 0 }, // Always fetch fresh data
   });
 
   // Request mint transaction
