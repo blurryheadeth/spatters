@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatEther } from 'viem';
@@ -43,6 +43,9 @@ export default function PublicMint() {
   
   // Dynamic countdown timer for remaining mint time
   const [remainingMinutes, setRemainingMinutes] = useState<number>(55);
+  
+  // Cache-bust timestamp - refreshed when preview seeds change to avoid stale cached previews
+  const cacheBustRef = useRef<number>(Date.now());
   
   const contractAddress = chainId ? getContractAddress(chainId) : '';
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
@@ -310,6 +313,13 @@ export default function PublicMint() {
     }
   }, [isRequestConfirmed, refetchPendingRequest]);
 
+  // Update cache-bust timestamp whenever preview seeds change (prevents stale cached previews)
+  useEffect(() => {
+    if (previewSeeds.length === 3) {
+      cacheBustRef.current = Date.now();
+    }
+  }, [previewSeeds]);
+
   // Update remaining minutes countdown when in preview mode
   useEffect(() => {
     if (previewSeeds.length !== 3) return;
@@ -352,33 +362,74 @@ export default function PublicMint() {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'spatters-canvas-ready') {
-        const { height } = event.data;
-        // Find which iframe sent this message by checking the source
-        const iframes = document.querySelectorAll('iframe[data-preview-seed]');
-        iframes.forEach((iframe) => {
-          if ((iframe as HTMLIFrameElement).contentWindow === event.source) {
-            const seed = iframe.getAttribute('data-preview-seed');
-            const previewIndex = iframe.getAttribute('data-preview-index');
-            if (seed) {
-              setIframeHeights(prev => ({ ...prev, [seed]: height }));
-            }
-            if (previewIndex !== null) {
-              const index = parseInt(previewIndex, 10);
-              // Mark this preview as finished
-              setFinishedPreviews(prev => new Set([...prev, index]));
-              // Auto-load the next preview if it exists
-              if (index < 2) {
-                setLoadedPreviews(prev => new Set([...prev, index + 1]));
+        const { height, previewIndex: msgIndex } = event.data;
+        
+        // Try to get index from message first (more reliable), then fall back to source matching
+        let index: number | null = null;
+        let seed: string | null = null;
+        
+        if (typeof msgIndex === 'number') {
+          // Index included in message - use directly (no source matching needed)
+          index = msgIndex;
+          seed = previewSeeds[index] || null;
+        } else {
+          // Fall back to source matching for backwards compatibility
+          const iframes = document.querySelectorAll('iframe[data-preview-seed]');
+          iframes.forEach((iframe) => {
+            if ((iframe as HTMLIFrameElement).contentWindow === event.source) {
+              seed = iframe.getAttribute('data-preview-seed');
+              const previewIndexAttr = iframe.getAttribute('data-preview-index');
+              if (previewIndexAttr !== null) {
+                index = parseInt(previewIndexAttr, 10);
               }
             }
+          });
+        }
+        
+        if (seed) {
+          setIframeHeights(prev => ({ ...prev, [seed as string]: height }));
+        }
+        if (index !== null) {
+          // Mark this preview as finished
+          setFinishedPreviews(prev => new Set([...prev, index as number]));
+          // Auto-load the next preview if it exists
+          if (index < 2) {
+            setLoadedPreviews(prev => new Set([...prev, index as number + 1]));
           }
-        });
+        }
       }
     };
     
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [previewSeeds]);
+
+  // Timeout fallback: if a preview doesn't finish in 30 seconds, force-load the next one
+  useEffect(() => {
+    if (previewSeeds.length !== 3) return;
+    
+    const timeouts: NodeJS.Timeout[] = [];
+    
+    // Set up timeouts for each preview that's loaded but not finished
+    loadedPreviews.forEach((index) => {
+      if (!finishedPreviews.has(index)) {
+        const timeout = setTimeout(() => {
+          console.log(`[Preview] Timeout: Preview ${index} didn't finish in 30s, forcing next load`);
+          // Mark as finished (with timeout flag for debugging)
+          setFinishedPreviews(prev => new Set([...prev, index]));
+          // Load next preview if exists
+          if (index < 2) {
+            setLoadedPreviews(prev => new Set([...prev, index + 1]));
+          }
+        }, 30000); // 30 seconds
+        timeouts.push(timeout);
+      }
+    });
+    
+    return () => {
+      timeouts.forEach(t => clearTimeout(t));
+    };
+  }, [previewSeeds.length, loadedPreviews, finishedPreviews]);
 
   // Hide body scrollbar when preview modal is open (prevents double scrollbar)
   useEffect(() => {
@@ -689,7 +740,8 @@ export default function PublicMint() {
         {/* All 3 Artworks Stacked - Sequential loading to prevent browser crash */}
         <div className="flex-1 overflow-auto" style={{ backgroundColor: COLORS.white }}>
           {previewSeeds.map((seed, index) => {
-            const previewUrl = `${baseUrl}/api/preview?seed=${seed}`;
+            // Include index for reliable postMessage matching and cache-bust to avoid stale previews
+            const previewUrl = `${baseUrl}/api/preview?seed=${seed}&index=${index}&t=${cacheBustRef.current}`;
             const isLoaded = loadedPreviews.has(index);
             const isFinished = finishedPreviews.has(index);
             

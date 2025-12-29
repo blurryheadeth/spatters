@@ -4,11 +4,13 @@
  * Generates artwork preview from a seed WITHOUT requiring a token to exist.
  * Used for the 3-option preview selection before minting.
  * 
- * URL: /api/preview?seed=0x...&palette=color1,color2,...
+ * URL: /api/preview?seed=0x...&palette=color1,color2,...&index=0&t=timestamp
  * 
  * Query params:
  * - seed: bytes32 hex string (required)
  * - palette: comma-separated 6 hex colors (optional)
+ * - index: preview index 0-2 for reliable postMessage matching (optional)
+ * - t: cache-bust timestamp (optional, ignored but prevents browser caching)
  */
 
 import { NextResponse } from 'next/server';
@@ -49,6 +51,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const seedHex = searchParams.get('seed');
   const paletteParam = searchParams.get('palette');
+  const indexParam = searchParams.get('index'); // Preview index for reliable postMessage
+  const previewIndex = indexParam !== null ? parseInt(indexParam, 10) : null;
 
   // Validate seed
   if (!seedHex || !/^0x[0-9A-Fa-f]{64}$/.test(seedHex)) {
@@ -225,6 +229,7 @@ ${spattersScript}
     // Preview data
     const SEED = ${seedDecimal};
     const PALETTE = ${JSON.stringify(paletteArray)};
+    const PREVIEW_INDEX = ${previewIndex !== null ? previewIndex : 'null'}; // For reliable postMessage matching
     
     var previewComplete = false;
     
@@ -232,6 +237,19 @@ ${spattersScript}
       const el = document.getElementById('status');
       if (el) el.textContent = msg;
       console.log('[Preview]', msg);
+    }
+    
+    // Send completion message to parent (for sequential loading)
+    function notifyParent(success, canvas) {
+      if (window.parent === window) return;
+      
+      window.parent.postMessage({
+        type: 'spatters-canvas-ready',
+        width: canvas ? canvas.width : 1200,
+        height: canvas ? canvas.height : 2400,
+        previewIndex: PREVIEW_INDEX, // Include index for reliable matching
+        success: success
+      }, '*');
     }
     
     window.setup = function() {
@@ -250,17 +268,13 @@ ${spattersScript}
         // Notify parent of canvas dimensions for dynamic iframe sizing
         setTimeout(() => {
           const canvas = document.querySelector('canvas');
-          if (canvas && window.parent !== window) {
-            window.parent.postMessage({
-              type: 'spatters-canvas-ready',
-              width: canvas.width,
-              height: canvas.height
-            }, '*');
-          }
+          notifyParent(true, canvas);
         }, 100);
       } catch (e) {
         updateStatus('Error: ' + e.message);
         console.error('Preview error:', e);
+        // Still notify parent on error so sequential loading can continue
+        setTimeout(() => notifyParent(false, null), 100);
       }
     };
     
@@ -274,6 +288,8 @@ ${spattersScript}
       } catch (e) {
         updateStatus('Error: ' + e.message);
         console.error('Init error:', e);
+        // Notify parent on init error so sequential loading can continue
+        notifyParent(false, null);
       }
     }
     
@@ -285,7 +301,9 @@ ${spattersScript}
   return new NextResponse(previewHtml, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600', // Cache previews for 1 hour
+      // No caching to prevent stale preview data (palette from previous mint, etc.)
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache',
     },
   });
 }
