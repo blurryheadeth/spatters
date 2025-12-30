@@ -173,6 +173,11 @@ export async function GET(
         trait_type: 'Latest Mutation',
         value: mutations[mutations.length - 1].mutationType,
       });
+      metadata.attributes.push({
+        display_type: 'date',
+        trait_type: 'Last Mutated',
+        value: Number(mutations[mutations.length - 1].timestamp),
+      });
     }
 
     return NextResponse.json(metadata, {
