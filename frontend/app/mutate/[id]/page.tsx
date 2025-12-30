@@ -483,6 +483,184 @@ function MutationInterface({
   );
 }
 
+// Simulation interface component (simplified version without transaction tracking)
+interface SimulationInterfaceProps {
+  onSimulate: (mutationType: string) => void;
+  simulationCount: number;
+}
+
+function SimulationInterface({ onSimulate, simulationCount }: SimulationInterfaceProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedPointsSubgroup, setSelectedPointsSubgroup] = useState<string | null>(null);
+
+  const handleMutationClick = (mutationType: string) => {
+    onSimulate(mutationType);
+    setIsModalOpen(false);
+    setSelectedGroup(null);
+    setSelectedPointsSubgroup(null);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedGroup(null);
+    setSelectedPointsSubgroup(null);
+  };
+
+  const goBack = () => {
+    if (selectedPointsSubgroup) {
+      setSelectedPointsSubgroup(null);
+    } else if (selectedGroup) {
+      setSelectedGroup(null);
+    }
+  };
+
+  const getHeaderTitle = () => {
+    if (selectedPointsSubgroup) {
+      const subgroup = POINTS_SUBGROUPS[selectedPointsSubgroup];
+      return `${subgroup?.emoji} Points - ${subgroup?.label}`;
+    }
+    if (selectedGroup === 'points') {
+      return '📍 Points';
+    }
+    if (selectedGroup) {
+      const group = MUTATION_GROUPS[selectedGroup];
+      return `${group?.emoji} ${group?.label}`;
+    }
+    return 'Select Mutation to Simulate';
+  };
+
+  return (
+    <div>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70"
+        style={{ 
+          backgroundColor: COLORS.blue, 
+          borderColor: COLORS.black,
+          color: COLORS.white
+        }}
+      >
+        🔮 Add Simulated Mutation
+      </button>
+
+      {/* Simulation Selection Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div className="w-full max-w-2xl max-h-[85vh] overflow-hidden border-2" style={{ backgroundColor: COLORS.white, borderColor: COLORS.blue }}>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b-2" style={{ borderColor: COLORS.blue, backgroundColor: COLORS.blue }}>
+              <h3 className="text-lg font-bold" style={{ color: COLORS.white }}>
+                {(selectedGroup || selectedPointsSubgroup) ? (
+                  <button 
+                    onClick={goBack}
+                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                    style={{ color: COLORS.white }}
+                  >
+                    <span>←</span>
+                    <span>{getHeaderTitle()}</span>
+                  </button>
+                ) : (
+                  '🔮 ' + getHeaderTitle()
+                )}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="text-2xl font-bold w-8 h-8 flex items-center justify-center hover:opacity-70 transition-opacity"
+                style={{ color: COLORS.white }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 overflow-y-auto max-h-[calc(85vh-80px)]" style={{ backgroundColor: COLORS.background }}>
+              {!selectedGroup ? (
+                /* Top-Level Group Selection */
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {Object.entries(MUTATION_GROUPS).map(([key, group]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedGroup(key)}
+                      className="flex flex-col items-center justify-center p-4 border-2 transition-opacity hover:opacity-80"
+                      style={{ backgroundColor: COLORS.white, borderColor: COLORS.blue }}
+                    >
+                      <span className="text-2xl mb-1">{group.emoji}</span>
+                      <span className="text-sm font-medium" style={{ color: COLORS.black }}>{group.label}</span>
+                      <span className="text-xs" style={{ color: COLORS.blue }}>{group.mutations.length} options</span>
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setSelectedGroup('points')}
+                    className="flex flex-col items-center justify-center p-4 border-2 transition-opacity hover:opacity-80"
+                    style={{ backgroundColor: COLORS.white, borderColor: COLORS.blue }}
+                  >
+                    <span className="text-2xl mb-1">📍</span>
+                    <span className="text-sm font-medium" style={{ color: COLORS.black }}>Points</span>
+                    <span className="text-xs" style={{ color: COLORS.blue }}>{POINTS_TOTAL_COUNT} options</span>
+                  </button>
+                </div>
+              ) : selectedGroup === 'points' && !selectedPointsSubgroup ? (
+                /* Points Sub-Group Selection */
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {Object.entries(POINTS_SUBGROUPS).map(([key, subgroup]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedPointsSubgroup(key)}
+                      className="flex flex-col items-center justify-center p-4 border-2 transition-opacity hover:opacity-80"
+                      style={{ backgroundColor: COLORS.white, borderColor: COLORS.blue }}
+                    >
+                      <span className="text-2xl mb-1">{subgroup.emoji}</span>
+                      <span className="text-sm font-medium" style={{ color: COLORS.black }}>{subgroup.label}</span>
+                      <span className="text-xs" style={{ color: COLORS.blue }}>{subgroup.mutations.length} options</span>
+                    </button>
+                  ))}
+                </div>
+              ) : selectedGroup === 'points' && selectedPointsSubgroup ? (
+                /* Points Mutation Selection */
+                <div className="space-y-2">
+                  {POINTS_SUBGROUPS[selectedPointsSubgroup]?.mutations.map((mutation) => (
+                    <button
+                      key={mutation}
+                      onClick={() => handleMutationClick(mutation)}
+                      className="w-full text-left px-4 py-3 border-2 transition-opacity hover:opacity-80"
+                      style={{ 
+                        backgroundColor: COLORS.blue, 
+                        borderColor: COLORS.black,
+                        color: COLORS.white
+                      }}
+                    >
+                      <span className="font-medium">{getMutationLabel(mutation)}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                /* Regular Group Mutation Selection */
+                <div className="space-y-2">
+                  {MUTATION_GROUPS[selectedGroup]?.mutations.map((mutation) => (
+                    <button
+                      key={mutation}
+                      onClick={() => handleMutationClick(mutation)}
+                      className="w-full text-left px-4 py-3 border-2 transition-opacity hover:opacity-80"
+                      style={{ 
+                        backgroundColor: COLORS.blue, 
+                        borderColor: COLORS.black,
+                        color: COLORS.white
+                      }}
+                    >
+                      <span className="font-medium">{getMutationLabel(mutation)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Calculate mutation-eligible dates for a token based on milestone anniversaries
 // Now returns dates from multiple years to ensure at least 5 upcoming dates
 function getMutationDates(
@@ -602,6 +780,10 @@ export default function MutatePage() {
   const [regenerationStatus, setRegenerationStatus] = useState<'idle' | 'waiting' | 'ready' | 'error'>('idle');
   const [regenerationMessage, setRegenerationMessage] = useState<string>('');
   const [iframeKey, setIframeKey] = useState<number>(0); // Force iframe reload
+
+  // Simulated mutations state (persists only while page is open)
+  // Each entry is [seed, mutationType] where seed is timestamp-based
+  const [simulatedMutations, setSimulatedMutations] = useState<Array<[number, string]>>([]);
 
   // Listen for iframe dimensions
   useEffect(() => {
@@ -748,6 +930,21 @@ export default function MutatePage() {
     } catch (err) {
       console.error('Mutation error:', err);
     }
+  };
+
+  // Handle simulated mutation (no blockchain transaction)
+  const handleSimulateMutation = (mutationType: string) => {
+    // Use current timestamp as the seed (similar to how real mutations use block.timestamp)
+    const seed = Math.floor(Date.now() / 1000);
+    setSimulatedMutations(prev => [...prev, [seed, mutationType]]);
+    // Force iframe reload to show updated simulation
+    setIframeKey(prev => prev + 1);
+  };
+
+  // Clear all simulated mutations
+  const clearSimulations = () => {
+    setSimulatedMutations([]);
+    setIframeKey(prev => prev + 1);
   };
 
   // After successful mutation
@@ -1000,9 +1197,30 @@ export default function MutatePage() {
 
       <main className="flex flex-col xl:flex-row">
         <div className="w-full xl:w-[1200px] xl:flex-shrink-0" style={{ backgroundColor: COLORS.white }}>
+          {/* Simulation Mode Banner */}
+          {simulatedMutations.length > 0 && (
+            <div 
+              className="px-4 py-2 flex items-center justify-between border-b-2"
+              style={{ backgroundColor: COLORS.blue, borderColor: COLORS.black }}
+            >
+              <span className="font-bold text-sm" style={{ color: COLORS.white }}>
+                🔮 SIMULATION MODE: {simulatedMutations.length} simulated mutation{simulatedMutations.length !== 1 ? 's' : ''}
+              </span>
+              <button
+                onClick={clearSimulations}
+                className="text-xs font-bold px-3 py-1 border-2 hover:opacity-80 transition-opacity"
+                style={{ backgroundColor: COLORS.white, borderColor: COLORS.black, color: COLORS.black }}
+              >
+                Clear & Show Real
+              </button>
+            </div>
+          )}
           <iframe
             key={iframeKey}
-            src={`${baseUrl}/api/token/${tokenId}?c=${contractAddress?.slice(-8) || ''}&v=${iframeKey}`}
+            src={simulatedMutations.length > 0
+              ? `${baseUrl}/api/simulate/${tokenId}?simMutations=${encodeURIComponent(JSON.stringify(simulatedMutations))}&v=${iframeKey}`
+              : `${baseUrl}/api/token/${tokenId}?c=${contractAddress?.slice(-8) || ''}&v=${iframeKey}`
+            }
             className="border-0 w-full"
             scrolling="no"
             style={{ 
@@ -1010,10 +1228,10 @@ export default function MutatePage() {
               maxWidth: '1200px',
               overflow: 'hidden',
             }}
-            title={`Spatter #${tokenId}`}
+            title={`Spatter #${tokenId}${simulatedMutations.length > 0 ? ' (Simulation)' : ''}`}
           />
           <div className="text-center text-sm py-2 border-t-2" style={{ backgroundColor: COLORS.white, borderColor: COLORS.black, color: COLORS.black }}>
-            Click artwork to cycle through mutation history • Mutations: {mutationCount}
+            Click artwork to cycle through mutation history • {simulatedMutations.length > 0 ? `Real: ${mutationCount} + Simulated: ${simulatedMutations.length}` : `Mutations: ${mutationCount}`}
           </div>
         </div>
 
@@ -1108,6 +1326,49 @@ export default function MutatePage() {
               </div>
             </div>
           </details>
+
+          {/* Simulate Mutations Section */}
+          <div className="border-2 p-4" style={{ backgroundColor: COLORS.white, borderColor: COLORS.blue }}>
+            <h2 className="text-base font-bold mb-2" style={{ color: COLORS.blue }}>
+              🔮 Simulate Mutations
+            </h2>
+            <p className="text-xs mb-3" style={{ color: COLORS.black, opacity: 0.7 }}>
+              Preview how mutations would look without executing a transaction. Simulations reset when you leave this page.
+            </p>
+            
+            {simulatedMutations.length > 0 && (
+              <div className="mb-3 p-2 border-2" style={{ backgroundColor: COLORS.background, borderColor: COLORS.blue }}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-bold" style={{ color: COLORS.blue }}>
+                    Active Simulations ({simulatedMutations.length})
+                  </span>
+                  <button
+                    onClick={clearSimulations}
+                    className="text-xs underline hover:opacity-70"
+                    style={{ color: COLORS.red }}
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {simulatedMutations.map((sim, i) => (
+                    <div 
+                      key={`${sim[0]}-${i}`} 
+                      className="text-xs p-1 border"
+                      style={{ backgroundColor: COLORS.white, borderColor: COLORS.blue }}
+                    >
+                      {i + 1}. {getMutationLabel(sim[1])}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <SimulationInterface
+              onSimulate={handleSimulateMutation}
+              simulationCount={simulatedMutations.length}
+            />
+          </div>
         </div>
       </main>
     </div>
