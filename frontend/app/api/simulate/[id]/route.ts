@@ -212,7 +212,7 @@ export async function GET(
   </style>
 </head>
 <body>
-  <div id="sim-banner">SIMULATION: ${simCount} simulated mutation${simCount !== 1 ? 's' : ''} + ${realCount} real</div>
+  <div id="sim-banner">SIMULATION: ${realCount} real + ${simCount} simulated mutation${simCount !== 1 ? 's' : ''}</div>
   <div id="status" style="position:fixed;top:40px;left:10px;color:#fff;font-family:monospace;z-index:9999;background:rgba(0,0,0,0.7);padding:5px 10px;border-radius:4px;"></div>
   
   <!-- Inject spatters.js from on-chain -->
