@@ -263,9 +263,8 @@ function formatMutationDate(date: Date): string {
   return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-// Mutation interface component (reusable for both regular and owner)
+// Mutation interface component
 interface MutationInterfaceProps {
-  isOwnerBypass?: boolean;
   onMutate: (mutationType: string) => void;
   isPending: boolean;
   isConfirming: boolean;
@@ -275,7 +274,6 @@ interface MutationInterfaceProps {
 }
 
 function MutationInterface({ 
-  isOwnerBypass = false,
   onMutate,
   isPending,
   isConfirming,
@@ -326,17 +324,6 @@ function MutationInterface({
 
   return (
     <div className="space-y-4">
-      {isOwnerBypass && (
-        <div className="border-2 p-3" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black, color: COLORS.white }}>
-          <p className="font-medium">
-            🔧 Contract Owner Bypass
-          </p>
-          <p className="text-sm">
-            As contract owner, you can mutate at any time (testing only).
-          </p>
-        </div>
-      )}
-
       {error && (
         <div className="border-2 p-3" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
           <p className="text-sm" style={{ color: COLORS.white }}>
@@ -369,9 +356,9 @@ function MutationInterface({
           disabled={isPending || isConfirming}
           className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ 
-            backgroundColor: isOwnerBypass ? COLORS.red : COLORS.green, 
+            backgroundColor: COLORS.green, 
             borderColor: COLORS.black,
-            color: isOwnerBypass ? COLORS.white : COLORS.black
+            color: COLORS.black
           }}
         >
           {isPending || isConfirming ? 'Processing...' : '🧬 Mutate'}
@@ -460,9 +447,9 @@ function MutationInterface({
                       onClick={() => handleMutationClick(mutation)}
                       className="w-full text-left px-4 py-3 border-2 transition-opacity hover:opacity-80"
                       style={{ 
-                        backgroundColor: isOwnerBypass ? COLORS.red : COLORS.green, 
+                        backgroundColor: COLORS.green, 
                         borderColor: COLORS.black,
-                        color: isOwnerBypass ? COLORS.white : COLORS.black
+                        color: COLORS.black
                       }}
                     >
                       <span className="font-medium">{getMutationLabel(mutation)}</span>
@@ -478,9 +465,9 @@ function MutationInterface({
                       onClick={() => handleMutationClick(mutation)}
                       className="w-full text-left px-4 py-3 border-2 transition-opacity hover:opacity-80"
                       style={{ 
-                        backgroundColor: isOwnerBypass ? COLORS.red : COLORS.green, 
+                        backgroundColor: COLORS.green, 
                         borderColor: COLORS.black,
-                        color: isOwnerBypass ? COLORS.white : COLORS.black
+                        color: COLORS.black
                       }}
                     >
                       <span className="font-medium">{getMutationLabel(mutation)}</span>
@@ -636,14 +623,6 @@ export default function MutatePage() {
     query: { enabled: !!contractAddress && !isNaN(tokenId) },
   });
 
-  // Check contract owner
-  const { data: contractOwner } = useReadContract({
-    address: contractAddress as `0x${string}`,
-    abi: SpattersABI.abi,
-    functionName: 'owner',
-    query: { enabled: !!contractAddress },
-  });
-
   // Get token data (mint timestamp)
   const { data: tokenData, isLoading: isLoadingToken } = useReadContract({
     address: contractAddress as `0x${string}`,
@@ -732,18 +711,6 @@ export default function MutatePage() {
   const { isLoading: isMutateConfirming, isSuccess: isMutateConfirmed } = 
     useWaitForTransactionReceipt({ hash: mutateHash });
 
-  // Owner mutate transaction (bypass)
-  const { 
-    data: ownerMutateHash, 
-    writeContract: writeOwnerMutate, 
-    isPending: isOwnerMutatePending,
-    error: ownerMutateError,
-    reset: resetOwnerMutate,
-  } = useWriteContract();
-
-  const { isLoading: isOwnerMutateConfirming, isSuccess: isOwnerMutateConfirmed } = 
-    useWaitForTransactionReceipt({ hash: ownerMutateHash });
-
   // Build milestone data array
   // Token data is returned as array: [mintSeed, mintTimestamp]
   const milestoneData: MilestoneData[] = useMemo(() => {
@@ -783,31 +750,12 @@ export default function MutatePage() {
     }
   };
 
-  // Handle owner mutate submission (bypass)
-  const handleOwnerMutate = async (mutationType: string) => {
-    if (!mutationType) {
-      alert('Please select a mutation type');
-      return;
-    }
-
-    try {
-      await writeOwnerMutate({
-        address: contractAddress as `0x${string}`,
-        abi: SpattersABI.abi,
-        functionName: 'ownerMutate',
-        args: [BigInt(tokenId), mutationType],
-      });
-    } catch (err) {
-      console.error('Owner mutation error:', err);
-    }
-  };
-
-  // After successful mutation (regular or owner)
+  // After successful mutation
   useEffect(() => {
     let pollInterval: NodeJS.Timeout | null = null;
     let isCancelled = false;
     
-    if (isMutateConfirmed || isOwnerMutateConfirmed) {
+    if (isMutateConfirmed) {
       // Mark token as recently mutated (for other pages to detect)
       markTokenMutated(tokenId);
       
@@ -907,13 +855,11 @@ export default function MutatePage() {
         clearInterval(pollInterval);
       }
     };
-  }, [isMutateConfirmed, isOwnerMutateConfirmed, tokenId, existingMutations]);
+  }, [isMutateConfirmed, tokenId, existingMutations]);
 
   const isLoading = isLoadingOwner || isLoadingToken;
   const isTokenOwner = ownerAddress && address && 
     (ownerAddress as string).toLowerCase() === address.toLowerCase();
-  const isContractOwner = contractOwner && address && 
-    (contractOwner as string).toLowerCase() === address.toLowerCase();
   const mutationCount = existingMutations ? (existingMutations as any[]).length : 0;
 
   // Countdown timer effect
@@ -1144,23 +1090,6 @@ export default function MutatePage() {
               </div>
             )}
           </div>
-
-          {Boolean(isContractOwner) && (
-            <div className="border-2 p-4" style={{ backgroundColor: COLORS.white, borderColor: COLORS.red }}>
-              <h2 className="text-base font-bold mb-3" style={{ color: COLORS.red }}>
-                🔧 Owner Mutation (Testing)
-              </h2>
-              <MutationInterface
-                isOwnerBypass
-                onMutate={handleOwnerMutate}
-                isPending={isOwnerMutatePending}
-                isConfirming={isOwnerMutateConfirming}
-                isConfirmed={isOwnerMutateConfirmed}
-                error={ownerMutateError}
-                onReset={resetOwnerMutate}
-              />
-            </div>
-          )}
 
           <details className="border-2" style={{ backgroundColor: COLORS.white, borderColor: COLORS.black }}>
             <summary className="p-4 cursor-pointer text-base font-bold hover:opacity-70" style={{ color: COLORS.black }}>
