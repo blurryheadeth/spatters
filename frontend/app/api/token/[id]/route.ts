@@ -84,14 +84,38 @@ export async function GET(
     pixelDataUrl += `?v=${Date.now()}`;
   }
 
-  // Generate minimal viewer HTML - ONLY body margin reset, nothing that interferes with p5.js canvas
+  // Generate minimal viewer HTML with responsive canvas scaling
+  // CSS ensures canvas fits within viewport while maintaining aspect ratio
+  // Works for both OpenSea iframes (fixed size) and our website (dynamic size)
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Spatter #${tokenId}</title>
-  <style>body{margin:0}</style>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #EBE5D9;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* p5.js creates a canvas element - scale it to fit viewport while maintaining aspect ratio */
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+  </style>
 </head>
 <body>
   <!-- p5.js from CDN -->
@@ -135,6 +159,7 @@ export async function GET(
         redraw();
         
         // Notify parent of canvas dimensions for dynamic iframe sizing
+        // Our website pages listen for this to set iframe height appropriately
         if (window.parent !== window) {
           window.parent.postMessage({
             type: 'spatters-canvas-ready',
