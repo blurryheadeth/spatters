@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useReadContract, useReadContracts } from 'wagmi';
+import { useReadContract, useReadContracts, useAccount } from 'wagmi';
 import Link from 'next/link';
 import { Abi } from 'viem';
 import { getContractAddress, getEtherscanBaseUrl } from '@/lib/config';
@@ -25,9 +25,10 @@ const COLORS = {
 };
 
 export default function CollectionPage() {
+  const { chainId: walletChainId } = useAccount();
   const [searchId, setSearchId] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [chainId] = useState<number>(11155111); // Default to Sepolia
+  const chainId = walletChainId || 1; // Default to Mainnet
   const [imageVersion, setImageVersion] = useState(0); // For cache-busting images
   const [recentlyMutated, setRecentlyMutated] = useState<number[]>([]);
 

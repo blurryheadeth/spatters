@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useReadContract } from 'wagmi';
+import { useReadContract, useAccount } from 'wagmi';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Abi } from 'viem';
@@ -26,7 +26,8 @@ const COLORS = {
 export default function TokenPage() {
   const params = useParams();
   const tokenId = params.id as string;
-  const [chainId] = useState<number>(11155111); // Default to Sepolia
+  const { chainId: walletChainId } = useAccount();
+  const chainId = walletChainId || 1; // Default to Mainnet
   const [iframeHeight, setIframeHeight] = useState<number | null>(null);
   const [iframeKey, setIframeKey] = useState<number>(0); // For force-reloading
   const [showUpdateBanner, setShowUpdateBanner] = useState(false);
