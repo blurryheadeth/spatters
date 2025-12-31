@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { getContractAddress } from '@/lib/config';
+import { getContractAddress, getEtherscanBaseUrl } from '@/lib/config';
 import SpattersABI from '@/contracts/Spatters.json';
 import { Abi } from 'viem';
 
@@ -121,6 +121,7 @@ export default function OwnerMint() {
   const cacheBustRef = useRef<number>(Date.now());
   
   const contractAddress = chainId ? getContractAddress(chainId) : '';
+  const etherscanBase = chainId ? getEtherscanBaseUrl(chainId) : 'https://etherscan.io';
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
 
   // Read owner address
@@ -1033,7 +1034,7 @@ export default function OwnerMint() {
               <p className="text-sm mt-1 opacity-90">
                 If you encounter any website issues, you can complete your mint directly on{' '}
                 <a 
-                  href={`https://sepolia.etherscan.io/address/${contractAddress}#writeContract`}
+                  href={`${etherscanBase}/address/${contractAddress}#writeContract`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:opacity-70"
