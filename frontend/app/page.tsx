@@ -40,8 +40,8 @@ export default function Home() {
   const { isConnected, chainId, address } = useAccount();
   const [activeTab, setActiveTab] = useState<'public' | 'owner'>('public');
   
-  // Get contract address for the current chain (default to Sepolia)
-  const currentChainId = chainId || 11155111;
+  // Get contract address for the current chain (default to Mainnet)
+  const currentChainId = chainId || 1;
   const contractAddress = getContractAddress(currentChainId);
   const etherscanBase = getEtherscanBaseUrl(currentChainId);
 

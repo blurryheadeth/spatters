@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server';
 import { createPublicClient, http } from 'viem';
 import { sepolia, mainnet } from 'viem/chains';
 
-const NETWORK = process.env.NEXT_PUBLIC_NETWORK || 'sepolia';
+const NETWORK = process.env.NEXT_PUBLIC_NETWORK || 'mainnet';
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 // Remove trailing slash to prevent double slashes in URLs
 const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');

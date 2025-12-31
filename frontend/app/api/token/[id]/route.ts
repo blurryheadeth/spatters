@@ -17,7 +17,7 @@ import { NextResponse } from 'next/server';
 import { createPublicClient, http } from 'viem';
 import { sepolia, mainnet } from 'viem/chains';
 
-const NETWORK = process.env.NEXT_PUBLIC_NETWORK || 'sepolia';
+const NETWORK = process.env.NEXT_PUBLIC_NETWORK || 'mainnet';
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 const chain = NETWORK === 'mainnet' ? mainnet : sepolia;
