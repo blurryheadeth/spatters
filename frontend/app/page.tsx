@@ -773,8 +773,8 @@ export default function Home() {
             </div>
 
             {/* Mutations explanation */}
-            <div className="border-2 p-6 mt-8" style={{ borderColor: COLORS.green, backgroundColor: '#f8fff8' }}>
-              <h4 className="text-lg font-bold mb-3" style={{ color: COLORS.green }}>
+            <div className="border-2 p-6 mt-8" style={{ borderColor: COLORS.red, backgroundColor: '#fff8f8' }}>
+              <h4 className="text-lg font-bold mb-3" style={{ color: COLORS.red }}>
                 How Mutations Work
               </h4>
               <p style={{ color: COLORS.black }}>
