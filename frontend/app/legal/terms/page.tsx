@@ -9,7 +9,7 @@ export default function TermsOfService() {
   return (
     <article className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-black mb-2">Terms of Service</h1>
-      <p className="text-sm opacity-70 mb-8">Last updated: January 2025</p>
+      <p className="text-sm opacity-70 mb-8">Last updated: January 2026</p>
 
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-4">1. Acceptance of Terms</h2>
@@ -97,7 +97,55 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">7. Royalties</h2>
+        <h2 className="text-2xl font-bold mb-4">7. Phishing Warning</h2>
+        <p>
+          It is common for malicious third parties to create fake websites that imitate legitimate NFT projects 
+          in order to steal cryptocurrency or NFTs. Before connecting your wallet or signing any transactions, 
+          always verify that you are on the official Spatters website:
+        </p>
+        <p className="mt-4 font-bold text-lg">
+          Official website: spatters.art
+        </p>
+        <p className="mt-4">
+          We will <strong>never</strong>:
+        </p>
+        <ul className="list-disc list-inside mt-2 space-y-2">
+          <li>Ask for your private keys or seed phrase</li>
+          <li>Send you direct messages asking you to connect your wallet to a different site</li>
+          <li>Ask you to &quot;verify&quot; or &quot;validate&quot; your wallet through unofficial links</li>
+          <li>Offer surprise airdrops that require you to visit external websites</li>
+        </ul>
+        <p className="mt-4">
+          We take no responsibility for losses resulting from phishing attacks, fake websites, or social 
+          engineering scams. Always verify URLs carefully before interacting with any website.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">8. Security and Hacking Risks</h2>
+        <p>
+          It is possible that the Spatters website or related infrastructure may be hacked, compromised, or 
+          otherwise maliciously attacked. We implement reasonable security measures but cannot guarantee 
+          absolute security.
+        </p>
+        <p className="mt-4">
+          We disclaim any liability for:
+        </p>
+        <ul className="list-disc list-inside mt-2 space-y-2">
+          <li>Unauthorized access to our servers or systems</li>
+          <li>Website defacement or modification</li>
+          <li>Injection of malicious code</li>
+          <li>Data breaches affecting user information</li>
+          <li>Any actions taken by users based on information from a compromised website</li>
+        </ul>
+        <p className="mt-4">
+          You remain solely responsible for verifying the authenticity of any transactions you sign and for 
+          the security of your own wallet and private keys.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">9. Royalties</h2>
         <p>
           The Spatters smart contract implements the EIP-2981 royalty standard with a 5% royalty on secondary sales. 
           However, this royalty is <strong>optional and voluntary</strong>. Marketplaces and buyers may choose 
@@ -106,7 +154,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">8. Prohibited Conduct</h2>
+        <h2 className="text-2xl font-bold mb-4">10. Prohibited Conduct</h2>
         <p>You agree not to:</p>
         <ul className="list-disc list-inside mt-4 space-y-2">
           <li>Use the website or NFTs for any illegal purpose</li>
@@ -119,7 +167,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">9. Restricted Jurisdictions</h2>
+        <h2 className="text-2xl font-bold mb-4">11. Restricted Jurisdictions</h2>
         <p>
           Spatters is not available to residents of, or persons located in, jurisdictions subject to comprehensive 
           sanctions by the United States, including but not limited to: Iran, North Korea, Cuba, Syria, and the 
@@ -129,7 +177,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">10. Disclaimers</h2>
+        <h2 className="text-2xl font-bold mb-4">12. Disclaimers</h2>
         <p>
           THE WEBSITE AND NFTS ARE PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, 
           EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING 
@@ -142,7 +190,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">11. Limitation of Liability</h2>
+        <h2 className="text-2xl font-bold mb-4">13. Limitation of Liability</h2>
         <p>
           TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL SPATTERS, ITS CREATOR, OR ANY AFFILIATED PARTIES 
           BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT 
@@ -160,7 +208,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">12. Indemnification</h2>
+        <h2 className="text-2xl font-bold mb-4">14. Indemnification</h2>
         <p>
           You agree to indemnify, defend, and hold harmless Spatters and its creator from and against any claims, 
           liabilities, damages, losses, and expenses arising out of or in any way connected with your access to 
@@ -169,7 +217,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">13. Governing Law</h2>
+        <h2 className="text-2xl font-bold mb-4">15. Governing Law</h2>
         <p>
           These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, 
           United States, without regard to its conflict of law provisions.
@@ -177,7 +225,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">14. Dispute Resolution</h2>
+        <h2 className="text-2xl font-bold mb-4">16. Dispute Resolution</h2>
         <p>
           Any dispute arising out of or relating to these Terms or your use of the website or NFTs shall be 
           resolved through binding arbitration in accordance with the rules of the American Arbitration Association. 
@@ -191,7 +239,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">15. Changes to Terms</h2>
+        <h2 className="text-2xl font-bold mb-4">17. Changes to Terms</h2>
         <p>
           We reserve the right to modify these Terms at any time. Changes will be effective immediately upon posting 
           to the website. Your continued use of the website after any changes constitutes acceptance of the new Terms.
@@ -199,7 +247,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">16. Severability</h2>
+        <h2 className="text-2xl font-bold mb-4">18. Severability</h2>
         <p>
           If any provision of these Terms is found to be unenforceable or invalid, that provision shall be limited 
           or eliminated to the minimum extent necessary so that these Terms shall otherwise remain in full force 
@@ -208,7 +256,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">17. Contact</h2>
+        <h2 className="text-2xl font-bold mb-4">19. Contact</h2>
         <p>
           For questions about these Terms, please contact:{' '}
           <a href="mailto:spatterseth@gmail.com" className="underline hover:opacity-70">

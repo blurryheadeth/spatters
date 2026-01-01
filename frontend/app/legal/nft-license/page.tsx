@@ -9,7 +9,7 @@ export default function NFTLicense() {
   return (
     <article className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-black mb-2">NFT License Agreement</h1>
-      <p className="text-sm opacity-70 mb-8">Last updated: January 2025</p>
+      <p className="text-sm opacity-70 mb-8">Last updated: January 2026</p>
 
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-4">1. Overview</h2>

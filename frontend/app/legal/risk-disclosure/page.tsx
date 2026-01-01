@@ -9,7 +9,7 @@ export default function RiskDisclosure() {
   return (
     <article className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-black mb-2">Risk Disclosure</h1>
-      <p className="text-sm opacity-70 mb-8">Last updated: January 2025</p>
+      <p className="text-sm opacity-70 mb-8">Last updated: January 2026</p>
 
       <div 
         className="p-6 mb-8 border-2 border-red-500 bg-red-50"
@@ -219,7 +219,27 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">10. No Guarantees About the Project</h2>
+        <h2 className="text-2xl font-bold mb-4">10. Artist Minting Rights</h2>
+        <p>
+          The artist (creator of Spatters) has the ability to mint new Spatters NFTs within the 999 token limit 
+          at any time <strong>without paying the minting fee</strong> that would be required of regular users. 
+          The artist may:
+        </p>
+        <ul className="list-disc list-inside mt-4 space-y-2">
+          <li>Mint new tokens at any time without cost (beyond gas fees)</li>
+          <li>Sell these tokens at any price, including below the current public mint price</li>
+          <li>Transfer these tokens for free to any wallet</li>
+          <li>List these tokens on secondary markets at any price</li>
+        </ul>
+        <p className="mt-4">
+          <strong>This may affect the secondary market value of other Spatters.</strong> By minting or purchasing 
+          a Spatter, you acknowledge and accept this risk and agree not to hold the artist liable for any impact 
+          on the value of your NFTs resulting from the artist&apos;s minting or selling activities.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">11. No Guarantees About the Project</h2>
         <p>
           We make no guarantees about:
         </p>
@@ -237,7 +257,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">11. Assumption of Risk</h2>
+        <h2 className="text-2xl font-bold mb-4">12. Assumption of Risk</h2>
         <p>
           By minting, purchasing, holding, or interacting with Spatters NFTs, you expressly acknowledge that:
         </p>
@@ -251,7 +271,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">12. Contact</h2>
+        <h2 className="text-2xl font-bold mb-4">13. Contact</h2>
         <p>
           For questions about these risks, please contact:{' '}
           <a href="mailto:spatterseth@gmail.com" className="underline hover:opacity-70">

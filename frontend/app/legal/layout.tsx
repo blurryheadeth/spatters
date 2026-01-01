@@ -31,10 +31,12 @@ export default function LegalLayout({
           >
             SPATTERS
           </Link>
-          <div className="flex gap-4 text-sm">
+          <div className="flex flex-wrap gap-3 text-sm">
             <Link href="/legal/terms" className="hover:underline">Terms</Link>
             <Link href="/legal/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/legal/cookies" className="hover:underline">Cookies</Link>
             <Link href="/legal/nft-license" className="hover:underline">License</Link>
+            <Link href="/legal/copyright" className="hover:underline">Copyright</Link>
             <Link href="/legal/risk-disclosure" className="hover:underline">Risks</Link>
           </div>
         </div>
