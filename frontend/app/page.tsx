@@ -180,7 +180,7 @@ export default function Home() {
   const [demoIframeHeight, setDemoIframeHeight] = useState(600);
   const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [isSimulationLoading, setIsSimulationLoading] = useState(false);
+  const [isSimulationLoading, setIsSimulationLoading] = useState(true); // Start true for initial load
 
   // Get mutation count for Spatter #1
   const { data: token1Mutations } = useReadContract({
