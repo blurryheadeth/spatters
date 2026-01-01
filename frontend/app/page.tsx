@@ -88,6 +88,21 @@ export default function Home() {
               <div className="text-sm font-medium" style={{ color: COLORS.black }}>Final Price</div>
             </div>
           </div>
+          
+          {/* What is generative art button */}
+          <div className="mt-12">
+            <button
+              onClick={() => document.getElementById('generative-art-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-6 py-3 font-bold border-2 hover:opacity-80 transition-opacity"
+              style={{ 
+                backgroundColor: COLORS.white, 
+                borderColor: COLORS.black, 
+                color: COLORS.black 
+              }}
+            >
+              What is generative art?
+            </button>
+          </div>
         </div>
       </section>
 
@@ -112,7 +127,7 @@ export default function Home() {
                 </h4>
                 <p style={{ color: COLORS.black }}>
                   Pay the mint price and request 3 unique seeds from the contract. 
-                  <span className="font-semibold"> Each token costs 1% more than the previous one</span>, 
+                  <span> Each token costs 1% more than the previous one</span>, 
                   ending at 100 ETH for token #999.
                 </p>
               </div>
@@ -199,7 +214,7 @@ export default function Home() {
                 Seed-Based Generation
               </h4>
               <p style={{ color: COLORS.black }}>
-                Each NFT is generated from on-chain seeds using p5.js. Choose from 3 previews before minting.
+                Each image is generated from on-chain seeds using p5.js. Choose from 3 previews before minting.
               </p>
             </div>
 
@@ -318,11 +333,11 @@ export default function Home() {
                 <strong>Generator Contract:</strong> Contains the custom rendering logic (spatters.js) split across multiple storage chunks
               </li>
               <li>
-                <strong>p5.js Dependency:</strong> We use the p5.js library (v1.0.0) deployed on-chain by{' '}
+                <strong>p5.js Dependency:</strong> The p5.js library (v1.0.0) used is the one deployed on-chain by{' '}
                 <a 
                   href="https://artblocks.io" 
-            target="_blank"
-            rel="noopener noreferrer"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="font-semibold hover:opacity-70"
                   style={{ color: COLORS.blue }}
                 >
@@ -338,13 +353,94 @@ export default function Home() {
               <p className="text-sm mb-2" style={{ color: COLORS.black }}>Contract Address:</p>
               <a
                 href={`${etherscanBase}/address/${contractAddress}`}
-            target="_blank"
-            rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-mono text-lg font-bold hover:opacity-70 transition-opacity break-all"
                 style={{ color: COLORS.blue }}
               >
                 {contractAddress}
               </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* On Generative Art - Educational Section */}
+      <section 
+        id="generative-art-section" 
+        className="py-16 border-t-2" 
+        style={{ borderColor: COLORS.black, backgroundColor: COLORS.white }}
+      >
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h3 className="text-3xl font-black text-center mb-10" style={{ color: COLORS.black }}>
+            On Generative Art
+          </h3>
+          
+          <div className="space-y-8" style={{ color: COLORS.black }}>
+            {/* What is generative art */}
+            <div>
+              <h4 className="text-xl font-bold mb-3" style={{ color: COLORS.blue }}>
+                What is generative art?
+              </h4>
+              <p className="mb-3 leading-relaxed">
+                Generative art is artwork created through a collaboration between an artist and an autonomous system. 
+                The artist writes a set of rules or an algorithm, and then the system executes those rules to produce 
+                unique outputs. Think of it like designing a recipe that can create infinite variations of a dish — 
+                the artist defines the ingredients and techniques, but each execution produces something new and unpredictable.
+              </p>
+              <p className="leading-relaxed">
+                Simple examples include fractal patterns, where mathematical formulas create infinitely complex shapes, 
+                or particle systems where thousands of simulated dots follow physics rules to create flowing, organic visuals. 
+                In Spatters, the algorithm creates abstract compositions by placing shapes, lines, and colors according to 
+                probabilistic rules — each piece following the same logic but arriving at a completely different result.
+              </p>
+            </div>
+
+            {/* How blockchain enables it */}
+            <div>
+              <h4 className="text-xl font-bold mb-3" style={{ color: COLORS.green }}>
+                How does blockchain enable generative art?
+              </h4>
+              <p className="mb-3 leading-relaxed">
+                Blockchain technology solves a fundamental challenge in generative art: verifiable randomness and permanence. 
+                When you mint a generative NFT, the blockchain provides a unique &quot;seed&quot; — a random number derived from 
+                transaction data that no one could have predicted. This seed feeds into the artist&apos;s algorithm to generate 
+                a one-of-a-kind artwork. Because the algorithm and seed are stored on-chain, anyone can verify that your 
+                specific artwork was genuinely generated at mint time, not hand-picked or modified later.
+              </p>
+              <p className="leading-relaxed">
+                The blockchain also ensures permanence: unlike traditional digital art that relies on servers and hosting, 
+                fully on-chain generative art exists as long as the blockchain itself does. The code, the seeds, and all 
+                the data needed to recreate the artwork live permanently in a decentralized, censorship-resistant system.
+              </p>
+            </div>
+
+            {/* How Spatters is different */}
+            <div 
+              className="p-6 border-2"
+              style={{ borderColor: COLORS.red, backgroundColor: '#fff8f8' }}
+            >
+              <h4 className="text-xl font-bold mb-3" style={{ color: COLORS.red }}>
+                How is Spatters different?
+              </h4>
+              <p className="mb-3 leading-relaxed">
+                In most blockchain generative art, only two people have agency in determining the final artwork: 
+                the <strong>artist</strong> who writes the algorithm, and the <strong>initial minter</strong> who triggers 
+                the generation with their transaction. Once minted, the artwork is frozen forever — a snapshot of that 
+                single moment of creation.
+              </p>
+              <p className="mb-3 leading-relaxed">
+                <strong>Spatters challenges this paradigm.</strong> We believe that collectors aren&apos;t just passive owners — 
+                they&apos;re participants in the artwork&apos;s ongoing story. Through our mutation system, every person who holds 
+                a Spatter has the opportunity to contribute to its evolution. On specific dates each year, you can apply 
+                a change to your artwork, adding a new layer generated from a fresh blockchain seed.
+              </p>
+              <p className="leading-relaxed">
+                This means a Spatter isn&apos;t just art you own — it&apos;s art you help shape. The full history of every change 
+                is preserved on-chain, creating a visual timeline of everyone who held and influenced that piece. 
+                Your Spatter becomes a collaborative work between the original artist, the first minter, you, and 
+                every future collector who chooses to leave their mark.
+              </p>
             </div>
           </div>
         </div>
