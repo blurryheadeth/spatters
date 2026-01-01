@@ -335,11 +335,6 @@ ${spattersScript}
       console.log('[Simulation]', msg);
     }
     
-    // Track dimensions for each frame in canvasHistory
-    // Each frame may have different dimensions due to aspect ratio mutations
-    var frameDimensions = [];
-    var currentFrameIndex = 0;
-    
     window.setup = function() {
       updateStatus('Generating simulation with ' + ALL_MUTATIONS.length + ' mutations...');
       
@@ -347,83 +342,29 @@ ${spattersScript}
         generate(MINT_SEED, ALL_MUTATIONS, CUSTOM_PALETTE);
         window.canvasHistory = canvasHistory;
         
-        // Calculate dimensions for each frame based on pixel count
-        // With pixelDensity=1: pixels.length = width * height * 4
-        // We know canvasWidth is always 1200, so height = pixels.length / (4 * 1200)
-        const BASE_WIDTH = 1200;
-        frameDimensions = canvasHistory.map(function(frame) {
-          const pixelCount = frame.length / 4;
-          const height = Math.round(pixelCount / BASE_WIDTH);
-          return { width: BASE_WIDTH, height: height };
-        });
-        
-        // Start at the last frame (most recent mutation)
-        currentFrameIndex = canvasHistory.length - 1;
-        
         setTimeout(() => {
           document.getElementById('status').style.display = 'none';
         }, 1500);
         
         generationComplete = true;
         
-        // Add touch listener for mobile (spatters.js normally does this in its setup, 
-        // but we override setup so we need to do it ourselves)
-        var el = document.getElementsByTagName("canvas")[0];
-        if (el) {
-          el.addEventListener("touchstart", function(e) {
-            e.preventDefault();
-            window.mouseClicked();
-          }, { passive: false });
-        }
-        
-        // Notify parent of initial canvas dimensions (last frame)
+        // Notify parent of maximum canvas height for iframe sizing
+        // spatters.js now handles dimension tracking and canvas resizing internally
+        // We send the max height so no frame gets cut off when cycling
         setTimeout(() => {
-          notifyParentDimensions();
+          if (window.parent !== window && typeof canvasHistoryDimensions !== 'undefined') {
+            const maxHeight = Math.max(...canvasHistoryDimensions.map(d => d.height));
+            window.parent.postMessage({
+              type: 'spatters-canvas-ready',
+              width: 1200,
+              height: maxHeight
+            }, '*');
+          }
         }, 100);
       } catch (e) {
         updateStatus('Simulation error: ' + e.message);
         console.error('Simulation error:', e);
       }
-    };
-    
-    function notifyParentDimensions() {
-      if (window.parent !== window && frameDimensions[currentFrameIndex]) {
-        const dims = frameDimensions[currentFrameIndex];
-        window.parent.postMessage({
-          type: 'spatters-canvas-ready',
-          width: dims.width,
-          height: dims.height,
-          frameIndex: currentFrameIndex,
-          totalFrames: canvasHistory.length
-        }, '*');
-      }
-    }
-    
-    // Override the default mouseClicked to handle dynamic canvas resizing
-    // This is necessary because frames can have different aspect ratios
-    window.mouseClicked = function() {
-      if (!generationComplete || canvasHistory.length === 0) return;
-      
-      // Cycle to next frame
-      currentFrameIndex = (currentFrameIndex + 1) % canvasHistory.length;
-      
-      const frame = canvasHistory[currentFrameIndex];
-      const dims = frameDimensions[currentFrameIndex];
-      
-      // Resize canvas if dimensions changed
-      if (width !== dims.width || height !== dims.height) {
-        resizeCanvas(dims.width, dims.height);
-      }
-      
-      // Copy pixels from the stored frame
-      loadPixels();
-      for (let i = 0; i < frame.length; i++) {
-        pixels[i] = frame[i];
-      }
-      updatePixels();
-      
-      // Notify parent of new dimensions so iframe can resize
-      notifyParentDimensions();
     };
     
     window.draw = function() {};
