@@ -22,25 +22,50 @@ export default function LegalLayout({
       className="min-h-screen"
       style={{ backgroundColor: COLORS.background, color: COLORS.black }}
     >
-      {/* Navigation */}
-      <nav className="border-b-2 py-4" style={{ borderColor: COLORS.black }}>
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <Link 
-            href="/" 
-            className="text-2xl font-black tracking-tight hover:opacity-70 transition-opacity"
-          >
-            SPATTERS
-          </Link>
-          <div className="flex flex-wrap gap-3 text-sm">
-            <Link href="/legal/terms" className="hover:underline">Terms</Link>
-            <Link href="/legal/privacy" className="hover:underline">Privacy</Link>
-            <Link href="/legal/cookies" className="hover:underline">Cookies</Link>
-            <Link href="/legal/nft-license" className="hover:underline">License</Link>
-            <Link href="/legal/copyright" className="hover:underline">Copyright</Link>
-            <Link href="/legal/risk-disclosure" className="hover:underline">Risks</Link>
+      {/* Navigation - matches homepage navbar */}
+      <header 
+        className="border-b-2 sticky top-0 z-50" 
+        style={{ borderColor: COLORS.black, backgroundColor: COLORS.background }}
+      >
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            {/* Left: Main Navigation Links */}
+            <div className="flex items-center gap-6">
+              <Link 
+                href="/" 
+                className="font-bold text-lg hover:opacity-70 transition-opacity"
+                style={{ color: COLORS.black }}
+              >
+                Home
+              </Link>
+              <Link 
+                href="/collection" 
+                className="font-bold text-lg hover:opacity-70 transition-opacity"
+                style={{ color: COLORS.black }}
+              >
+                Collection
+              </Link>
+              <Link 
+                href="/my-spatters" 
+                className="font-bold text-lg hover:opacity-70 transition-opacity"
+                style={{ color: COLORS.black }}
+              >
+                My Spatters
+              </Link>
+            </div>
+            
+            {/* Right: Legal page links */}
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Link href="/legal/terms" className="hover:underline">Terms</Link>
+              <Link href="/legal/privacy" className="hover:underline">Privacy</Link>
+              <Link href="/legal/cookies" className="hover:underline">Cookies</Link>
+              <Link href="/legal/nft-license" className="hover:underline">License</Link>
+              <Link href="/legal/copyright" className="hover:underline">Copyright</Link>
+              <Link href="/legal/risk-disclosure" className="hover:underline">Risks</Link>
+            </div>
           </div>
         </div>
-      </nav>
+      </header>
 
       {/* Content */}
       <main className="container mx-auto px-4 py-12 max-w-4xl">
