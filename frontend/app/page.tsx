@@ -921,7 +921,7 @@ export default function Home() {
                 adding a new layer generated from a fresh blockchain seed.
               </p>
               <p className="mb-3 leading-relaxed">
-                In Spatters, the seed that serves as input for the algorithm, both for the initial mint and for mutations, 
+                The seed that serves as input for the Spatters algorithm, both for the initial mint and for mutations, 
                 is a large number computed as a combination of who is executing the code (blockchain wallet address) and 
                 when (blockchain block timestamp). Different people executing the same code at the same time would 
                 therefore get different results, as would the same person executing the algorithm at different times. 
