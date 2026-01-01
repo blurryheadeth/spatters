@@ -604,6 +604,12 @@ export default function Home() {
                 </div>
               )}
 
+              <div className="border-2 p-4" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
+                <p className="text-sm font-medium" style={{ color: COLORS.white }}>
+                  ⏱️ <strong>Please be patient:</strong> Generating a mutation preview can take up to 1-2 minutes. The page may appear unresponsive during this process — please wait and do not reload the page.
+                </p>
+              </div>
+
               <div className="border-2 p-4" style={{ backgroundColor: COLORS.yellow, borderColor: COLORS.black }}>
                 <p className="text-sm font-medium" style={{ color: COLORS.black }}>
                   💡 <strong>Note:</strong> Real mutations can only be applied on special dates by token owners. These simulations are just for demonstration!
