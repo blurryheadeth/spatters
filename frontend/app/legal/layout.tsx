@@ -56,6 +56,7 @@ export default function LegalLayout({
             
             {/* Right: Legal page links */}
             <div className="flex flex-wrap gap-3 text-sm">
+              <Link href="/legal/all" className="hover:underline font-bold" style={{ color: '#fc1a4a' }}>All</Link>
               <Link href="/legal/terms" className="hover:underline">Terms</Link>
               <Link href="/legal/privacy" className="hover:underline">Privacy</Link>
               <Link href="/legal/cookies" className="hover:underline">Cookies</Link>
