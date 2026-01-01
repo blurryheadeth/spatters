@@ -6,6 +6,8 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { formatEther } from 'viem';
 import { getContractAddress, getEtherscanBaseUrl } from '@/lib/config';
 import SpattersABI from '@/contracts/Spatters.json';
+import ConsentModal from './ConsentModal';
+import { ConsentData } from '@/lib/consent';
 
 // Spatters color palette
 const COLORS = {
@@ -40,6 +42,10 @@ export default function PublicMint() {
   
   // Confirmation modal for 55-minute warning
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  
+  // Legal consent state - only stored in memory until mint completes
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [consentData, setConsentData] = useState<ConsentData | null>(null);
   
   // Dynamic countdown timer for remaining mint time
   const [remainingMinutes, setRemainingMinutes] = useState<number>(55);
@@ -461,6 +467,24 @@ export default function PublicMint() {
       refetchMintStatus();
       refetchPendingRequest();
       
+      // Store consent to database NOW that mint payment is complete
+      // This is the only time consent is persisted (not on signature alone)
+      if (consentData && completeHash) {
+        console.log('[PublicMint] Storing consent for successful mint');
+        fetch('/api/consent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...consentData,
+            mintTxHash: completeHash,
+            tokenId: newTokenId,
+          }),
+        })
+          .then(res => res.json())
+          .then(data => console.log('[PublicMint] Consent stored:', data))
+          .catch(err => console.error('[PublicMint] Consent storage error:', err));
+      }
+      
       // Trigger pixel generation in background
       console.log(`[PublicMint] Triggering pixel generation for token ${newTokenId}`);
       fetch('/api/trigger-generation', {
@@ -477,7 +501,7 @@ export default function PublicMint() {
         router.push(`/token/${newTokenId}`);
       }, 1500);
     }
-  }, [isCompleteConfirmed, supplyBeforeMint, router, hasTriggeredGeneration, refetchMintStatus, refetchPendingRequest]);
+  }, [isCompleteConfirmed, supplyBeforeMint, router, hasTriggeredGeneration, refetchMintStatus, refetchPendingRequest, consentData, completeHash]);
 
   // Handle request mint
   const handleRequestMint = async () => {
@@ -906,7 +930,14 @@ export default function PublicMint() {
         ) : (
           /* New mint request */
           <button
-            onClick={() => setShowConfirmModal(true)}
+            onClick={() => {
+              // Show consent modal first if not already signed this session
+              if (!consentData) {
+                setShowConsentModal(true);
+              } else {
+                setShowConfirmModal(true);
+              }
+            }}
             disabled={isRequestPending || isRequestConfirming || !mintPrice}
             className="w-full font-bold py-3 px-6 transition-colors border-2"
             style={{ 
@@ -922,6 +953,20 @@ export default function PublicMint() {
           </button>
         )}
       </div>
+
+      {/* Legal Consent Modal - shown first before any mint action */}
+      {showConsentModal && address && (
+        <ConsentModal
+          walletAddress={address}
+          onConsent={(data) => {
+            setConsentData(data);
+            setShowConsentModal(false);
+            // After signing consent, show the 55-minute warning modal
+            setShowConfirmModal(true);
+          }}
+          onCancel={() => setShowConsentModal(false)}
+        />
+      )}
 
       {/* Confirmation Modal for 55-minute warning */}
       {showConfirmModal && (
