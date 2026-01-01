@@ -319,7 +319,7 @@ export default function Home() {
                   className="mt-3 p-3 border-2 font-semibold"
                   style={{ borderColor: COLORS.red, backgroundColor: '#fff0f0', color: COLORS.red }}
                 >
-                  ⚠️ You have 55 minutes to choose. If no option is selected, 
+                  ⚠️ You have 45 minutes to choose. If no option is selected, 
                   the mint is cancelled and the minting fee is <strong>NOT refundable</strong>.
                 </div>
               </div>

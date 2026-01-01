@@ -49,17 +49,17 @@ export default function TermsOfService() {
         </p>
         <ol className="list-decimal list-inside mt-4 space-y-2">
           <li>
-            <strong>Initiate Mint:</strong> Pay the minting fee to reserve your Spatter. This starts a 55-minute 
+            <strong>Initiate Mint:</strong> Pay the minting fee to reserve your Spatter. This starts a 45-minute 
             generation window.
           </li>
           <li>
-            <strong>Complete Mint:</strong> Within the 55-minute window, complete the mint to receive your NFT. 
+            <strong>Complete Mint:</strong> Within the 45-minute window, complete the mint to receive your NFT. 
             If you fail to complete within this window, your mint will expire.
           </li>
         </ol>
         <p className="mt-4">
           <strong>No Refunds:</strong> Minting fees are non-refundable under any circumstances, including but not 
-          limited to: failure to complete the mint within the 55-minute window, technical issues, user error, 
+          limited to: failure to complete the mint within the 45-minute window, technical issues, user error, 
           network congestion, or dissatisfaction with the generated artwork. By initiating a mint, you acknowledge 
           and accept this no-refund policy.
         </p>

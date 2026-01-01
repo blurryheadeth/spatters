@@ -161,7 +161,7 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
               />
               <span className="text-sm" style={{ color: COLORS.black }}>
                 I understand that my minting fee is <strong style={{ color: COLORS.red }}>NON-REFUNDABLE under ANY circumstances</strong>, 
-                including if I fail to select one of the three artwork options within the 55-minute window
+                including if I fail to select one of the three artwork options within the 45-minute window
               </span>
             </label>
 

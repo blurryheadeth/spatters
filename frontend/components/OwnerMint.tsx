@@ -111,11 +111,15 @@ export default function OwnerMint() {
   // Track which previews have finished rendering (received postMessage)
   const [finishedPreviews, setFinishedPreviews] = useState<Set<number>>(new Set());
   
-  // Confirmation modal for 55-minute warning
+  // Confirmation modal for 45-minute warning
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
   // Dynamic countdown timer for remaining mint time
-  const [remainingMinutes, setRemainingMinutes] = useState<number>(55);
+  const [remainingMinutes, setRemainingMinutes] = useState<number>(45);
+  
+  // Commit step modal with 15-second countdown
+  const [showCommitModal, setShowCommitModal] = useState(false);
+  const [commitCountdown, setCommitCountdown] = useState(15);
   
   // Cache-bust timestamp - refreshed when preview seeds change to avoid stale cached previews
   const cacheBustRef = useRef<number>(Date.now());
@@ -192,7 +196,18 @@ export default function OwnerMint() {
   const activeMintRequester = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[1] : null;
   const activeMintRequestExpiry = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[2] : BigInt(0);
 
-  // Request owner mint transaction (3-option flow)
+  // Commit owner mint transaction (3-option flow - Step 1)
+  const { 
+    data: commitHash, 
+    writeContract: writeCommitMint, 
+    isPending: isCommitPending,
+    reset: resetCommit 
+  } = useWriteContract();
+  
+  const { isLoading: isCommitConfirming, isSuccess: isCommitConfirmed } = 
+    useWaitForTransactionReceipt({ hash: commitHash });
+
+  // Request owner mint transaction (3-option flow - Step 2)
   const { 
     data: requestHash, 
     writeContract: writeRequestMint, 
@@ -229,11 +244,11 @@ export default function OwnerMint() {
   const isOwner = address && ownerAddress && 
     address.toLowerCase() === (ownerAddress as string).toLowerCase();
 
-  // Helper to check if a pending request is still within the 55-minute window
+  // Helper to check if a pending request is still within the 45-minute window
   const isRequestStillValid = (timestamp: bigint): boolean => {
     const requestTime = Number(timestamp);
     if (requestTime === 0) return false;
-    const expirationTime = requestTime + (55 * 60); // 55 minutes
+    const expirationTime = requestTime + (45 * 60); // 45 minutes
     const now = Math.floor(Date.now() / 1000);
     return now < expirationTime;
   };
@@ -301,9 +316,29 @@ export default function OwnerMint() {
     return `${minutes}m ${seconds}s`;
   };
 
+  // Handle commit confirmation - show countdown modal
+  useEffect(() => {
+    if (isCommitConfirmed) {
+      setShowCommitModal(true);
+      setCommitCountdown(15);
+    }
+  }, [isCommitConfirmed]);
+
+  // Commit countdown timer
+  useEffect(() => {
+    if (!showCommitModal || commitCountdown <= 0) return;
+    
+    const timer = setInterval(() => {
+      setCommitCountdown(prev => Math.max(0, prev - 1));
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [showCommitModal, commitCountdown]);
+
   // Handle request confirmation - extract seeds from pending request
   useEffect(() => {
     if (isRequestConfirmed) {
+      setShowCommitModal(false);
       refetchPendingRequest().then(({ data }) => {
         if (data) {
           const request = data as { seeds: string[]; timestamp: bigint; completed: boolean };
@@ -333,15 +368,15 @@ export default function OwnerMint() {
       if (activeMintRequestExpiry && activeMintRequestExpiry > BigInt(0)) {
         return Number(activeMintRequestExpiry);
       }
-      // Fallback to pending request timestamp + 55 minutes
+      // Fallback to pending request timestamp + 45 minutes
       if (pendingRequest) {
         const request = pendingRequest as { timestamp: bigint };
         if (request.timestamp && request.timestamp > BigInt(0)) {
-          return Number(request.timestamp) + (55 * 60);
+          return Number(request.timestamp) + (45 * 60);
         }
       }
-      // Default: 55 minutes from now (shouldn't happen)
-      return Math.floor(Date.now() / 1000) + (55 * 60);
+      // Default: 45 minutes from now (shouldn't happen)
+      return Math.floor(Date.now() / 1000) + (45 * 60);
     };
     
     const updateCountdown = () => {
@@ -527,7 +562,10 @@ export default function OwnerMint() {
     setLoadedPreviews(new Set([0])); // Reset to only first preview
     setFinishedPreviews(new Set()); // Clear finished tracking
     setIframeHeights({}); // Clear iframe heights
+    setShowCommitModal(false);
+    setCommitCountdown(15);
     setError('');
+    resetCommit();
     resetRequest();
     resetComplete();
     resetDirect();
@@ -553,8 +591,8 @@ export default function OwnerMint() {
     return true;
   };
 
-  // Handle request owner mint (3-option flow)
-  const handleRequestOwnerMint = async () => {
+  // Handle commit owner mint (3-option flow - Step 1)
+  const handleCommitOwnerMint = async () => {
     if (!validateInputs()) return;
     
     const paletteParam: [string, string, string, string, string, string] = useCustomPalette
@@ -564,11 +602,25 @@ export default function OwnerMint() {
     setIsLoadingPreviews(true);
     
     try {
+      await writeCommitMint({
+        address: contractAddress as `0x${string}`,
+        abi: SpattersABI.abi,
+        functionName: 'commitOwnerMint',
+        args: [paletteParam],
+      });
+    } catch (err: any) {
+      setError(err.message || 'Commit failed');
+      setIsLoadingPreviews(false);
+    }
+  };
+
+  // Handle request owner mint (3-option flow - Step 2)
+  const handleRequestOwnerMint = async () => {
+    try {
       await writeRequestMint({
         address: contractAddress as `0x${string}`,
         abi: SpattersABI.abi,
         functionName: 'requestOwnerMint',
-        args: [paletteParam],
       });
     } catch (err: any) {
       setError(err.message || 'Request failed');
@@ -678,7 +730,7 @@ export default function OwnerMint() {
           <div className="space-y-4">
             <p style={{ color: COLORS.black }}>
               Another user is currently selecting from 3 preview options. 
-              Minting is blocked until they complete their selection or the 55-minute window expires.
+              Minting is blocked until they complete their selection or the 45-minute window expires.
             </p>
             <div className="border-2 p-4" style={{ backgroundColor: COLORS.white, borderColor: COLORS.black }}>
               <p className="text-sm" style={{ color: COLORS.black }}>
@@ -722,7 +774,7 @@ export default function OwnerMint() {
               ⏰ Previous Selection Expired
             </h3>
             <p className="text-sm" style={{ color: COLORS.white }}>
-              Your previous 3-option preview has expired (55-minute window passed). 
+              Your previous 3-option preview has expired (45-minute window passed). 
               Please generate new options to continue.
             </p>
           </div>
@@ -1004,16 +1056,17 @@ export default function OwnerMint() {
 
             <button
               onClick={() => setShowConfirmModal(true)}
-              disabled={isRequestPending || isRequestConfirming || isLoadingPreviews}
+              disabled={isCommitPending || isCommitConfirming || isRequestPending || isRequestConfirming || isLoadingPreviews}
               className="w-full font-bold py-3 px-6 transition-colors border-2"
               style={{ 
                 backgroundColor: '#2587c3', 
                 borderColor: '#000000',
                 color: '#FFFFFF',
-                opacity: (isRequestPending || isRequestConfirming || isLoadingPreviews) ? 0.5 : 1,
+                opacity: (isCommitPending || isCommitConfirming || isRequestPending || isRequestConfirming || isLoadingPreviews) ? 0.5 : 1,
               }}
             >
-              {isRequestPending || isRequestConfirming ? 'Generating Seeds...' : 
+              {isCommitPending || isCommitConfirming ? 'Committing...' : 
+               isRequestPending || isRequestConfirming ? 'Generating Seeds...' : 
                isLoadingPreviews ? 'Loading Previews...' : 'Generate 3 Previews'}
             </button>
           </div>
@@ -1219,7 +1272,7 @@ export default function OwnerMint() {
           </div>
         )}
 
-        {/* Confirmation Modal for 55-minute warning */}
+        {/* Confirmation Modal for 45-minute warning */}
         {showConfirmModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
             <div 
@@ -1235,14 +1288,14 @@ export default function OwnerMint() {
                 </p>
                 <ul className="list-disc pl-6 space-y-2" style={{ color: '#000000' }}>
                   <li>
-                    <strong>You will have exactly 55 minutes</strong> to select one of the 3 options.
+                    <strong>You will have exactly 45 minutes</strong> to select one of the 3 options.
                   </li>
                   <li>
                     If you <strong>do not select an option</strong> within this time, 
                     your mint request will be <strong>automatically cancelled</strong>.
                   </li>
                   <li style={{ color: '#fc1a4a' }}>
-                    <strong>Your minting fee is NOT refundable</strong> if you fail to complete the selection in time.
+                    <strong>Your minting slot is NOT refundable</strong> if you fail to complete the selection in time.
                   </li>
                 </ul>
                 <p className="font-semibold" style={{ color: '#000000' }}>
@@ -1260,7 +1313,7 @@ export default function OwnerMint() {
                 <button
                   onClick={() => {
                     setShowConfirmModal(false);
-                    handleRequestOwnerMint();
+                    handleCommitOwnerMint();
                   }}
                   className="flex-1 py-3 px-6 font-bold border-2 transition-opacity hover:opacity-70"
                   style={{ backgroundColor: '#2587c3', borderColor: '#000000', color: '#FFFFFF' }}
@@ -1268,6 +1321,57 @@ export default function OwnerMint() {
                   I Understand, Continue
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Commit Confirmed Modal with 15s countdown */}
+        {showCommitModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+            <div 
+              className="max-w-lg w-full p-6 border-2"
+              style={{ backgroundColor: '#FFFFFF', borderColor: '#000000' }}
+            >
+              <h3 className="text-2xl font-bold mb-4 text-center" style={{ color: '#2587c3' }}>
+                ✓ Commit Confirmed!
+              </h3>
+              <div className="space-y-4 mb-6">
+                <p style={{ color: '#000000' }}>
+                  Your commit has been recorded on the blockchain. The system needs to wait for the next block to generate your 3 preview options securely.
+                </p>
+                <div className="border-2 p-4 text-center" style={{ backgroundColor: '#EBE5D9', borderColor: '#2587c3' }}>
+                  <p className="text-sm mb-2" style={{ color: '#000000' }}>
+                    Please wait for secure randomness...
+                  </p>
+                  <p className="text-4xl font-bold" style={{ color: '#2587c3' }}>
+                    {commitCountdown}s
+                  </p>
+                </div>
+                <div className="border-2 p-3" style={{ backgroundColor: '#fc1a4a', borderColor: '#000000' }}>
+                  <p className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
+                    ⚠️ Remember: You have <strong>45 minutes</strong> from now to complete your selection.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowCommitModal(false);
+                  handleRequestOwnerMint();
+                }}
+                disabled={commitCountdown > 0 || isRequestPending || isRequestConfirming}
+                className="w-full py-3 px-6 font-bold border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: commitCountdown > 0 ? '#EBE5D9' : '#2587c3', 
+                  borderColor: '#000000', 
+                  color: commitCountdown > 0 ? '#000000' : '#FFFFFF' 
+                }}
+              >
+                {isRequestPending || isRequestConfirming
+                  ? 'Generating Options...'
+                  : commitCountdown > 0 
+                  ? `Wait ${commitCountdown}s...` 
+                  : 'View 3 Options'}
+              </button>
             </div>
           </div>
         )}

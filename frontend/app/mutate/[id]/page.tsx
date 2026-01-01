@@ -266,19 +266,33 @@ function formatMutationDate(date: Date): string {
 
 // Mutation interface component
 interface MutationInterfaceProps {
-  onMutate: (mutationType: string) => void;
-  isPending: boolean;
-  isConfirming: boolean;
-  isConfirmed: boolean;
+  onCommitMutation: (mutationType: string) => void;
+  onApplyMutation: () => void;
+  isCommitPending: boolean;
+  isCommitConfirming: boolean;
+  isApplyPending: boolean;
+  isApplyConfirming: boolean;
+  isApplyConfirmed: boolean;
+  commitCountdown: number;
+  showCommitModal: boolean;
+  setShowCommitModal: (show: boolean) => void;
+  pendingMutationType: string | null;
   error: Error | null;
   onReset: () => void;
 }
 
 function MutationInterface({ 
-  onMutate,
-  isPending,
-  isConfirming,
-  isConfirmed,
+  onCommitMutation,
+  onApplyMutation,
+  isCommitPending,
+  isCommitConfirming,
+  isApplyPending,
+  isApplyConfirming,
+  isApplyConfirmed,
+  commitCountdown,
+  showCommitModal,
+  setShowCommitModal,
+  pendingMutationType,
   error,
   onReset,
 }: MutationInterfaceProps) {
@@ -287,7 +301,7 @@ function MutationInterface({
   const [selectedPointsSubgroup, setSelectedPointsSubgroup] = useState<string | null>(null);
 
   const handleMutationClick = (mutationType: string) => {
-    onMutate(mutationType);
+    onCommitMutation(mutationType);
     setIsModalOpen(false);
     setSelectedGroup(null);
     setSelectedPointsSubgroup(null);
@@ -333,7 +347,7 @@ function MutationInterface({
         </div>
       )}
 
-      {isConfirmed && (
+      {isApplyConfirmed && (
         <div className="border-2 p-3" style={{ backgroundColor: COLORS.green, borderColor: COLORS.black, color: COLORS.black }}>
           <p className="font-medium">
             ✓ Mutation Applied Successfully!
@@ -351,10 +365,10 @@ function MutationInterface({
         </div>
       )}
 
-      {!isConfirmed && (
+      {!isApplyConfirmed && (
         <button
           onClick={() => setIsModalOpen(true)}
-          disabled={isPending || isConfirming}
+          disabled={isCommitPending || isCommitConfirming || isApplyPending || isApplyConfirming}
           className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ 
             backgroundColor: COLORS.green, 
@@ -362,8 +376,60 @@ function MutationInterface({
             color: COLORS.black
           }}
         >
-          {isPending || isConfirming ? 'Processing...' : '🧬 Mutate'}
+          {isCommitPending || isCommitConfirming ? 'Committing...' : 
+           isApplyPending || isApplyConfirming ? 'Applying...' : '🧬 Mutate'}
         </button>
+      )}
+
+      {/* Commit Confirmed Modal with 15s countdown */}
+      {showCommitModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[60] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
+          <div 
+            className="max-w-lg w-full p-6 border-2"
+            style={{ backgroundColor: COLORS.white, borderColor: COLORS.black }}
+          >
+            <h3 className="text-2xl font-bold mb-4 text-center" style={{ color: COLORS.green }}>
+              ✓ Mutation Committed!
+            </h3>
+            <div className="space-y-4 mb-6">
+              <p style={{ color: COLORS.black }}>
+                Your mutation <strong>"{pendingMutationType ? getMutationLabel(pendingMutationType) : ''}"</strong> has been committed. The system needs to wait for the next block to generate the mutation securely.
+              </p>
+              <div className="border-2 p-4 text-center" style={{ backgroundColor: COLORS.background, borderColor: COLORS.green }}>
+                <p className="text-sm mb-2" style={{ color: COLORS.black }}>
+                  Please wait for secure randomness...
+                </p>
+                <p className="text-4xl font-bold" style={{ color: COLORS.green }}>
+                  {commitCountdown}s
+                </p>
+              </div>
+              <div className="border-2 p-3" style={{ backgroundColor: COLORS.yellow, borderColor: COLORS.black }}>
+                <p className="text-sm font-medium" style={{ color: COLORS.black }}>
+                  ⚠️ You have <strong>45 minutes</strong> to apply this mutation or it will expire.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setShowCommitModal(false);
+                onApplyMutation();
+              }}
+              disabled={commitCountdown > 0 || isApplyPending || isApplyConfirming}
+              className="w-full py-3 px-6 font-bold border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ 
+                backgroundColor: commitCountdown > 0 ? COLORS.background : COLORS.green, 
+                borderColor: COLORS.black, 
+                color: COLORS.black 
+              }}
+            >
+              {isApplyPending || isApplyConfirming
+                ? 'Applying Mutation...'
+                : commitCountdown > 0 
+                ? `Wait ${commitCountdown}s...` 
+                : '🧬 Mutate'}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Mutation Selection Modal */}
@@ -882,17 +948,37 @@ export default function MutatePage() {
     query: { enabled: !!contractAddress && !isNaN(tokenId) },
   });
 
-  // Regular mutate transaction
+  // Commit mutation transaction (Step 1)
   const { 
-    data: mutateHash, 
-    writeContract: writeMutate, 
-    isPending: isMutatePending,
-    error: mutateError,
-    reset: resetMutate,
+    data: commitHash, 
+    writeContract: writeCommitMutation, 
+    isPending: isCommitPending,
+    error: commitError,
+    reset: resetCommit,
   } = useWriteContract();
 
-  const { isLoading: isMutateConfirming, isSuccess: isMutateConfirmed } = 
-    useWaitForTransactionReceipt({ hash: mutateHash });
+  const { isLoading: isCommitConfirming, isSuccess: isCommitConfirmed } = 
+    useWaitForTransactionReceipt({ hash: commitHash });
+
+  // Apply mutation transaction (Step 2)
+  const { 
+    data: applyHash, 
+    writeContract: writeApplyMutation, 
+    isPending: isApplyPending,
+    error: applyError,
+    reset: resetApply,
+  } = useWriteContract();
+
+  const { isLoading: isApplyConfirming, isSuccess: isApplyConfirmed } = 
+    useWaitForTransactionReceipt({ hash: applyHash });
+
+  // Combined error
+  const mutateError = commitError || applyError;
+
+  // Mutation commit modal state
+  const [showMutationCommitModal, setShowMutationCommitModal] = useState(false);
+  const [mutationCommitCountdown, setMutationCommitCountdown] = useState(15);
+  const [pendingMutationType, setPendingMutationType] = useState<string | null>(null);
 
   // Build milestone data array
   // Token data is returned as array: [mintSeed, mintTimestamp]
@@ -914,23 +1000,67 @@ export default function MutatePage() {
     return getMutationDates(tokenId, mintTimestamp, milestoneData);
   }, [tokenId, tokenData, milestoneData]);
 
-  // Handle regular mutate submission
-  const handleMutate = async (mutationType: string) => {
+  // Handle commit mutation (Step 1)
+  const handleCommitMutation = async (mutationType: string) => {
     if (!mutationType) {
       alert('Please select a mutation type');
       return;
     }
 
+    setPendingMutationType(mutationType);
+
     try {
-      await writeMutate({
+      await writeCommitMutation({
         address: contractAddress as `0x${string}`,
         abi: SpattersABI.abi,
-        functionName: 'mutate',
+        functionName: 'commitMutation',
         args: [BigInt(tokenId), mutationType],
       });
     } catch (err) {
-      console.error('Mutation error:', err);
+      console.error('Commit mutation error:', err);
     }
+  };
+
+  // Handle apply mutation (Step 2)
+  const handleApplyMutation = async () => {
+    try {
+      await writeApplyMutation({
+        address: contractAddress as `0x${string}`,
+        abi: SpattersABI.abi,
+        functionName: 'applyMutation',
+        args: [BigInt(tokenId)],
+      });
+    } catch (err) {
+      console.error('Apply mutation error:', err);
+    }
+  };
+
+  // Handle commit confirmation - show countdown modal
+  useEffect(() => {
+    if (isCommitConfirmed) {
+      setShowMutationCommitModal(true);
+      setMutationCommitCountdown(15);
+    }
+  }, [isCommitConfirmed]);
+
+  // Mutation commit countdown timer
+  useEffect(() => {
+    if (!showMutationCommitModal || mutationCommitCountdown <= 0) return;
+    
+    const timer = setInterval(() => {
+      setMutationCommitCountdown(prev => Math.max(0, prev - 1));
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [showMutationCommitModal, mutationCommitCountdown]);
+
+  // Reset mutation state
+  const resetMutate = () => {
+    resetCommit();
+    resetApply();
+    setShowMutationCommitModal(false);
+    setMutationCommitCountdown(15);
+    setPendingMutationType(null);
   };
 
   // Handle simulated mutation (no blockchain transaction)
@@ -948,12 +1078,14 @@ export default function MutatePage() {
     setIframeKey(prev => prev + 1);
   };
 
-  // After successful mutation
+  // After successful mutation (apply confirmed)
   useEffect(() => {
     let pollInterval: NodeJS.Timeout | null = null;
     let isCancelled = false;
     
-    if (isMutateConfirmed) {
+    if (isApplyConfirmed) {
+      // Close the commit modal if still open
+      setShowMutationCommitModal(false);
       // Mark token as recently mutated (for other pages to detect)
       markTokenMutated(tokenId);
       
@@ -1053,7 +1185,7 @@ export default function MutatePage() {
         clearInterval(pollInterval);
       }
     };
-  }, [isMutateConfirmed, tokenId, existingMutations]);
+  }, [isApplyConfirmed, tokenId, existingMutations]);
 
   const isLoading = isLoadingOwner || isLoadingToken;
   const isTokenOwner = ownerAddress && address && 
@@ -1278,10 +1410,17 @@ export default function MutatePage() {
                   )}
                 </div>
                 <MutationInterface
-                  onMutate={handleMutate}
-                  isPending={isMutatePending}
-                  isConfirming={isMutateConfirming}
-                  isConfirmed={isMutateConfirmed}
+                  onCommitMutation={handleCommitMutation}
+                  onApplyMutation={handleApplyMutation}
+                  isCommitPending={isCommitPending}
+                  isCommitConfirming={isCommitConfirming}
+                  isApplyPending={isApplyPending}
+                  isApplyConfirming={isApplyConfirming}
+                  isApplyConfirmed={isApplyConfirmed}
+                  commitCountdown={mutationCommitCountdown}
+                  showCommitModal={showMutationCommitModal}
+                  setShowCommitModal={setShowMutationCommitModal}
+                  pendingMutationType={pendingMutationType}
                   error={mutateError}
                   onReset={resetMutate}
                 />

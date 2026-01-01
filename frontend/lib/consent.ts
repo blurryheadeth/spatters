@@ -32,7 +32,7 @@ I EXPLICITLY ACKNOWLEDGE AND AGREE THAT:
 
 NON-REFUNDABLE PAYMENT:
 - The minting fee I am about to pay is NON-REFUNDABLE under ANY circumstances.
-- If I fail to select one of the three artwork options within the 55-minute window, my minting fee will NOT be refunded.
+- If I fail to select one of the three artwork options within the 45-minute window, my minting fee will NOT be refunded.
 - If I abandon the minting process for any reason, my minting fee will NOT be refunded.
 - There are no exceptions to this non-refund policy.
 

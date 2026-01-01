@@ -40,7 +40,7 @@ export default function PublicMint() {
   // Track which previews have finished rendering (received postMessage)
   const [finishedPreviews, setFinishedPreviews] = useState<Set<number>>(new Set());
   
-  // Confirmation modal for 55-minute warning
+  // Confirmation modal for 45-minute warning
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
   // Legal consent state - only stored in memory until mint completes
@@ -48,7 +48,11 @@ export default function PublicMint() {
   const [consentData, setConsentData] = useState<ConsentData | null>(null);
   
   // Dynamic countdown timer for remaining mint time
-  const [remainingMinutes, setRemainingMinutes] = useState<number>(55);
+  const [remainingMinutes, setRemainingMinutes] = useState<number>(45);
+  
+  // Commit step modal with 15-second countdown
+  const [showCommitModal, setShowCommitModal] = useState(false);
+  const [commitCountdown, setCommitCountdown] = useState(15);
   
   // Cache-bust timestamp - refreshed when preview seeds change to avoid stale cached previews
   const cacheBustRef = useRef<number>(Date.now());
@@ -117,7 +121,18 @@ export default function PublicMint() {
     query: { staleTime: 0 }, // Always fetch fresh data
   });
 
-  // Request mint transaction
+  // Commit mint transaction (Step 1 - pays the fee)
+  const { 
+    data: commitHash, 
+    writeContract: writeCommitMint, 
+    isPending: isCommitPending,
+    reset: resetCommit
+  } = useWriteContract();
+  
+  const { isLoading: isCommitConfirming, isSuccess: isCommitConfirmed } = 
+    useWaitForTransactionReceipt({ hash: commitHash });
+
+  // Request mint transaction (Step 2 - generates seeds)
   const { 
     data: requestHash, 
     writeContract: writeRequestMint, 
@@ -215,11 +230,11 @@ export default function PublicMint() {
     return () => clearInterval(interval);
   }, [lastGlobalMintTime, refetchMintStatus]);
 
-  // Helper to check if a pending request is still within the 55-minute window
+  // Helper to check if a pending request is still within the 45-minute window
   const isRequestStillValid = (timestamp: bigint): boolean => {
     const requestTime = Number(timestamp);
     if (requestTime === 0) return false;
-    const expirationTime = requestTime + (55 * 60); // 55 minutes
+    const expirationTime = requestTime + (45 * 60); // 45 minutes
     const now = Math.floor(Date.now() / 1000);
     return now < expirationTime;
   };
@@ -250,7 +265,7 @@ export default function PublicMint() {
             
             // Calculate remaining time (will be updated by interval)
             const requestTime = Number(request.timestamp);
-            const expirationTime = requestTime + (55 * 60);
+            const expirationTime = requestTime + (45 * 60);
             const now = Math.floor(Date.now() / 1000);
             const remaining = Math.max(0, expirationTime - now);
             const mins = Math.floor(remaining / 60);
@@ -280,7 +295,7 @@ export default function PublicMint() {
     
     const updateRemainingTime = () => {
       const requestTime = Number(request.timestamp);
-      const expirationTime = requestTime + (55 * 60);
+      const expirationTime = requestTime + (45 * 60);
       const now = Math.floor(Date.now() / 1000);
       const remaining = Math.max(0, expirationTime - now);
       
@@ -310,9 +325,29 @@ export default function PublicMint() {
     }
   };
 
+  // Handle commit confirmation - show countdown modal
+  useEffect(() => {
+    if (isCommitConfirmed) {
+      setShowCommitModal(true);
+      setCommitCountdown(15);
+    }
+  }, [isCommitConfirmed]);
+
+  // Commit countdown timer
+  useEffect(() => {
+    if (!showCommitModal || commitCountdown <= 0) return;
+    
+    const timer = setInterval(() => {
+      setCommitCountdown(prev => Math.max(0, prev - 1));
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [showCommitModal, commitCountdown]);
+
   // Handle request confirmation - extract seeds from pending request
   useEffect(() => {
     if (isRequestConfirmed) {
+      setShowCommitModal(false);
       refetchPendingRequest().then(({ data }) => {
         if (data) {
           const request = data as { seeds: string[]; timestamp: bigint; completed: boolean };
@@ -341,15 +376,15 @@ export default function PublicMint() {
       if (activeMintRequestExpiry && activeMintRequestExpiry > BigInt(0)) {
         return Number(activeMintRequestExpiry);
       }
-      // Fallback to pending request timestamp + 55 minutes
+      // Fallback to pending request timestamp + 45 minutes
       if (pendingRequest) {
         const request = pendingRequest as { timestamp: bigint };
         if (request.timestamp && request.timestamp > BigInt(0)) {
-          return Number(request.timestamp) + (55 * 60);
+          return Number(request.timestamp) + (45 * 60);
         }
       }
-      // Default: 55 minutes from now (shouldn't happen)
-      return Math.floor(Date.now() / 1000) + (55 * 60);
+      // Default: 45 minutes from now (shouldn't happen)
+      return Math.floor(Date.now() / 1000) + (45 * 60);
     };
     
     const updateCountdown = () => {
@@ -503,9 +538,26 @@ export default function PublicMint() {
     }
   }, [isCompleteConfirmed, supplyBeforeMint, router, hasTriggeredGeneration, refetchMintStatus, refetchPendingRequest, consentData, completeHash]);
 
-  // Handle request mint
-  const handleRequestMint = async () => {
+  // Handle commit mint (Step 1 - pays the fee)
+  const handleCommitMint = async () => {
     if (!mintPrice || !address) return;
+    setError('');
+    
+    try {
+      await writeCommitMint({
+        address: contractAddress as `0x${string}`,
+        abi: SpattersABI.abi,
+        functionName: 'commitMint',
+        value: mintPrice as bigint,
+      });
+    } catch (err: any) {
+      setError(err.message || 'Commit failed');
+    }
+  };
+
+  // Handle request mint (Step 2 - generates seeds, no payment)
+  const handleRequestMint = async () => {
+    if (!address) return;
     setError('');
     
     try {
@@ -513,7 +565,6 @@ export default function PublicMint() {
         address: contractAddress as `0x${string}`,
         abi: SpattersABI.abi,
         functionName: 'requestMint',
-        value: mintPrice as bigint,
       });
     } catch (err: any) {
       setError(err.message || 'Request failed');
@@ -553,6 +604,9 @@ export default function PublicMint() {
     setLoadedPreviews(new Set([0])); // Reset to only first preview
     setFinishedPreviews(new Set()); // Clear finished tracking
     setIframeHeights({}); // Clear iframe heights
+    setShowCommitModal(false);
+    setCommitCountdown(15);
+    resetCommit();
     resetRequest();
     resetComplete();
     // Refetch contract state to get latest status
@@ -607,7 +661,7 @@ export default function PublicMint() {
           <div className="space-y-4">
             <p style={{ color: COLORS.black }}>
               Another user is currently selecting from 3 preview options. 
-              Minting is blocked until they complete their selection or the 55-minute window expires.
+              Minting is blocked until they complete their selection or the 45-minute window expires.
             </p>
             <div className="border-2 p-4" style={{ backgroundColor: COLORS.white, borderColor: COLORS.black }}>
               <p className="text-sm" style={{ color: COLORS.black }}>
@@ -876,7 +930,7 @@ export default function PublicMint() {
             ⏰ Previous Selection Expired
           </h3>
           <p className="text-sm mb-2" style={{ color: COLORS.white }}>
-            Your previous 3-option preview has expired (55-minute window passed). 
+            Your previous 3-option preview has expired (45-minute window passed). 
             Unfortunately, your payment for that request cannot be recovered.
           </p>
           <p className="text-xs" style={{ color: COLORS.white, opacity: 0.9 }}>
@@ -899,12 +953,13 @@ export default function PublicMint() {
         <div className="border-2 p-4 mb-6" style={{ backgroundColor: COLORS.background, borderColor: COLORS.blue }}>
           <h3 className="font-bold mb-2" style={{ color: COLORS.blue }}>How it works:</h3>
           <ol className="list-decimal list-inside text-sm space-y-1" style={{ color: COLORS.black }}>
-            <li>Pay the mint price to generate 3 random artwork options</li>
+            <li>Pay the mint price to commit your request</li>
+            <li>Wait ~15 seconds for secure randomness, then view 3 options</li>
             <li>Preview all 3 options and choose your favorite</li>
             <li>Confirm your selection to mint your chosen artwork</li>
           </ol>
           <p className="text-xs mt-2" style={{ color: COLORS.black, opacity: 0.7 }}>
-            You have 55 minutes to make your selection. Seeds are generated on-chain.
+            You have 45 minutes to make your selection. Seeds are generated securely on-chain.
           </p>
         </div>
 
@@ -938,16 +993,18 @@ export default function PublicMint() {
                 setShowConfirmModal(true);
               }
             }}
-            disabled={isRequestPending || isRequestConfirming || !mintPrice}
+            disabled={isCommitPending || isCommitConfirming || isRequestPending || isRequestConfirming || !mintPrice}
             className="w-full font-bold py-3 px-6 transition-colors border-2"
             style={{ 
               backgroundColor: '#fc1a4a', 
               borderColor: '#000000',
               color: '#FFFFFF',
-              opacity: (isRequestPending || isRequestConfirming || !mintPrice) ? 0.5 : 1,
+              opacity: (isCommitPending || isCommitConfirming || isRequestPending || isRequestConfirming || !mintPrice) ? 0.5 : 1,
             }}
           >
-            {isRequestPending || isRequestConfirming 
+            {isCommitPending || isCommitConfirming 
+              ? 'Committing...' 
+              : isRequestPending || isRequestConfirming
               ? 'Generating Options...' 
               : `Generate 3 Options (${mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH)`}
           </button>
@@ -961,14 +1018,14 @@ export default function PublicMint() {
           onConsent={(data) => {
             setConsentData(data);
             setShowConsentModal(false);
-            // After signing consent, show the 55-minute warning modal
+            // After signing consent, show the 45-minute warning modal
             setShowConfirmModal(true);
           }}
           onCancel={() => setShowConsentModal(false)}
         />
       )}
 
-      {/* Confirmation Modal for 55-minute warning */}
+      {/* Confirmation Modal for 45-minute warning */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
           <div 
@@ -984,7 +1041,7 @@ export default function PublicMint() {
               </p>
               <ul className="list-disc pl-6 space-y-2" style={{ color: '#000000' }}>
                 <li>
-                  <strong>You will have exactly 55 minutes</strong> to select one of the 3 options.
+                  <strong>You will have exactly 45 minutes</strong> to select one of the 3 options.
                 </li>
                 <li>
                   If you <strong>do not select an option</strong> within this time, 
@@ -1009,7 +1066,7 @@ export default function PublicMint() {
               <button
                 onClick={() => {
                   setShowConfirmModal(false);
-                  handleRequestMint();
+                  handleCommitMint();
                 }}
                 className="flex-1 py-3 px-6 font-bold border-2 transition-opacity hover:opacity-70"
                 style={{ backgroundColor: '#fc1a4a', borderColor: '#000000', color: '#FFFFFF' }}
@@ -1017,6 +1074,57 @@ export default function PublicMint() {
                 I Understand, Continue
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Commit Confirmed Modal with 15s countdown */}
+      {showCommitModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+          <div 
+            className="max-w-lg w-full p-6 border-2"
+            style={{ backgroundColor: '#FFFFFF', borderColor: '#000000' }}
+          >
+            <h3 className="text-2xl font-bold mb-4 text-center" style={{ color: '#2587c3' }}>
+              ✓ Payment Confirmed!
+            </h3>
+            <div className="space-y-4 mb-6">
+              <p style={{ color: '#000000' }}>
+                Your commit has been recorded on the blockchain. The system needs to wait for the next block to generate your 3 preview options securely.
+              </p>
+              <div className="border-2 p-4 text-center" style={{ backgroundColor: '#EBE5D9', borderColor: '#2587c3' }}>
+                <p className="text-sm mb-2" style={{ color: '#000000' }}>
+                  Please wait for secure randomness...
+                </p>
+                <p className="text-4xl font-bold" style={{ color: '#2587c3' }}>
+                  {commitCountdown}s
+                </p>
+              </div>
+              <div className="border-2 p-3" style={{ backgroundColor: '#fc1a4a', borderColor: '#000000' }}>
+                <p className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
+                  ⚠️ Remember: You have <strong>45 minutes</strong> from now to complete your selection or your payment is forfeited.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setShowCommitModal(false);
+                handleRequestMint();
+              }}
+              disabled={commitCountdown > 0 || isRequestPending || isRequestConfirming}
+              className="w-full py-3 px-6 font-bold border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ 
+                backgroundColor: commitCountdown > 0 ? '#EBE5D9' : '#2587c3', 
+                borderColor: '#000000', 
+                color: commitCountdown > 0 ? '#000000' : '#FFFFFF' 
+              }}
+            >
+              {isRequestPending || isRequestConfirming
+                ? 'Generating Options...'
+                : commitCountdown > 0 
+                ? `Wait ${commitCountdown}s...` 
+                : 'View 3 Options'}
+            </button>
           </div>
         </div>
       )}

@@ -165,7 +165,7 @@ export default function RiskDisclosure() {
           <strong>All minting fees are non-refundable.</strong> This applies regardless of:
         </p>
         <ul className="list-disc list-inside mt-4 space-y-2">
-          <li>Whether you complete the mint within the 55-minute window</li>
+          <li>Whether you complete the mint within the 45-minute window</li>
           <li>Whether you are satisfied with the generated artwork</li>
           <li>Technical issues or user errors</li>
           <li>Network congestion or failed transactions</li>
