@@ -606,7 +606,7 @@ export default function Home() {
 
               <div className="border-2 p-4" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
                 <p className="text-sm font-medium" style={{ color: COLORS.white }}>
-                  ⏱️ <strong>Please be patient:</strong> Generating a mutation preview can take up to 1-2 minutes. The page may appear unresponsive during this process — please wait and do not reload the page.
+                  ⏱️ <strong>Please be patient:</strong> Generating a mutation preview can take up to 1-2 minutes per mutation. The page may appear unresponsive during this process — please wait and do not reload the page.
                 </p>
               </div>
 
