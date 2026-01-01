@@ -484,7 +484,7 @@ export default function Home() {
             Try it out with Spatter #1!
           </h3>
           <p className="text-center mb-8 max-w-2xl mx-auto" style={{ color: COLORS.black }}>
-            Experience how mutations work. Simulate changes to see potential outcomes — these are just previews and won&apos;t affect the real artwork.
+            Experience how mutations work: simulate changes below to see potential outcomes. These are just previews and won&apos;t affect the real artwork.
           </p>
           
           <div className="flex flex-col lg:flex-row gap-6">
@@ -768,8 +768,8 @@ export default function Home() {
                     Adding Details
                   </h4>
                   <p style={{ color: COLORS.black }}>
-                    Finally, circles and lines are placed within the shape to add texture and visual interest. These elements are drawn in black — unless the 
-                    background beneath them is too dark, in which case they automatically become white for contrast.
+                    Finally, circles and lines are placed within the shape to add texture and visual interest. These elements are drawn in black, unless the 
+                    background beneath them is too dark, in which case they automatically transition to white for better contrast.
                   </p>
                 </div>
               </div>
@@ -781,7 +781,7 @@ export default function Home() {
                 How Mutations Work
               </h4>
               <p style={{ color: COLORS.black }}>
-                Mutations modify one or more of these parameters. When you choose a mutation type — like &quot;expand shape&quot; or &quot;change colors&quot; — 
+                Mutations modify one or more of these parameters. When you choose a mutation type like &quot;expand shape&quot; or &quot;change colors&quot; 
                 you&apos;re directing <em>what</em> changes, but not <em>how</em> it changes. The specific outcome depends on the new random seed generated 
                 at the moment of mutation, just like any generative art process. This means you have creative agency in guiding your Spatter&apos;s evolution, 
                 while still embracing the beautiful unpredictability that makes generative art special.
