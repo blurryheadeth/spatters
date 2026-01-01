@@ -8,6 +8,7 @@ import { getContractAddress } from '@/lib/config';
 import SpattersABI from '@/contracts/Spatters.json';
 import { markTokenMutated } from '@/lib/mutation-tracker';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 // Spatters color palette
 const COLORS = {
@@ -1371,6 +1372,9 @@ export default function MutatePage() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

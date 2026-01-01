@@ -8,6 +8,7 @@ import { getContractAddress, getEtherscanBaseUrl } from '@/lib/config';
 import SpattersABI from '@/contracts/Spatters.json';
 import { getRecentlyMutatedTokenIds, clearAllMutationRecords } from '@/lib/mutation-tracker';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const contractAbi = SpattersABI.abi as Abi;
 
@@ -335,6 +336,9 @@ export default function CollectionPage() {
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

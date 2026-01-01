@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import PublicMint from '@/components/PublicMint';
 import OwnerMint from '@/components/OwnerMint';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { getContractAddress, getEtherscanBaseUrl } from '@/lib/config';
 import SpattersABI from '@/contracts/Spatters.json';
 
@@ -941,12 +942,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t-2 py-8" style={{ borderColor: COLORS.black, backgroundColor: COLORS.background }}>
-        <div className="container mx-auto px-4 text-center" style={{ color: COLORS.black }}>
-          <p className="font-medium">© 2025 Spatters. All rights reserved.</p>
-          <p className="mt-2 text-sm">Built on Ethereum • Fully On-Chain</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

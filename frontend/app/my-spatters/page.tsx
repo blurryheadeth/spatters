@@ -7,6 +7,7 @@ import { getContractAddress } from '@/lib/config';
 import SpattersABI from '@/contracts/Spatters.json';
 import { getRecentlyMutatedTokenIds, clearAllMutationRecords } from '@/lib/mutation-tracker';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 // Spatters color palette
 const COLORS = {
@@ -403,6 +404,9 @@ export default function MySpattersPage() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
