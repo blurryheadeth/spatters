@@ -2,29 +2,14 @@ import type { NextConfig } from "next";
 
 // Content Security Policy configuration
 // This protects users from XSS attacks and clickjacking while allowing all necessary functionality
+// Note: connect-src uses 'https:' to allow any HTTPS endpoint (required for various RPC providers)
 const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval';
   style-src 'self' 'unsafe-inline';
   font-src 'self' data:;
   img-src 'self' data: blob: https:;
-  connect-src 'self' 
-    https://*.walletconnect.com 
-    https://*.walletconnect.org
-    wss://*.walletconnect.com 
-    wss://*.walletconnect.org
-    wss://relay.walletconnect.com
-    wss://relay.walletconnect.org
-    https://*.supabase.co 
-    https://*.alchemy.com 
-    https://*.infura.io 
-    https://eth.llamarpc.com 
-    https://eth.public-rpc.com
-    https://eth-sepolia.public.blastapi.io
-    https://cloudflare-eth.com
-    https://rpc.ankr.com
-    https://ethereum.publicnode.com
-    https://*.ethereum.org;
+  connect-src 'self' https: wss:;
   frame-src 'self';
   frame-ancestors 'self';
   object-src 'none';
