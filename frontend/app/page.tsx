@@ -509,29 +509,14 @@ export default function Home() {
                 </div>
               )}
               
-              {/* Artwork iframe with loading state */}
+              {/* Artwork iframe */}
               <div 
-                className="relative border-2"
+                className="border-2"
                 style={{ 
                   borderColor: COLORS.black,
                   backgroundColor: COLORS.background,
-                  minHeight: `${demoIframeHeight}px`,
                 }}
               >
-                {isSimulationLoading && (
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center z-10"
-                    style={{ backgroundColor: COLORS.background }}
-                  >
-                    <div className="flex flex-col items-center gap-3">
-                      <svg className="animate-spin h-8 w-8" style={{ color: COLORS.blue }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span className="font-medium" style={{ color: COLORS.black }}>Generating preview...</span>
-                    </div>
-                  </div>
-                )}
                 <iframe
                   key={demoIframeKey}
                   src={demoSimulations.length > 0
@@ -543,8 +528,6 @@ export default function Home() {
                   style={{ 
                     height: `${demoIframeHeight}px`,
                     overflow: 'hidden',
-                    opacity: isSimulationLoading ? 0 : 1,
-                    transition: 'opacity 0.3s ease',
                   }}
                   title={`Spatter #1${demoSimulations.length > 0 ? ' (Simulation)' : ''}`}
                 />
@@ -601,6 +584,18 @@ export default function Home() {
                         {idx + 1}. {MUTATION_LABELS[mutationType] || mutationType}
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Loading indicator */}
+              {isSimulationLoading && (
+                <div className="border-2 p-4" style={{ backgroundColor: COLORS.blue, borderColor: COLORS.black }}>
+                  <div className="flex items-center gap-3">
+                    <div className="animate-pulse w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.white }} />
+                    <span className="text-sm font-medium" style={{ color: COLORS.white }}>
+                      Generating preview...
+                    </span>
                   </div>
                 </div>
               )}
@@ -921,7 +916,7 @@ export default function Home() {
                 the opportunity to contribute to its evolution. On specific dates each year, you can apply a change to your artwork, 
                 adding a new layer generated from a fresh blockchain seed.
               </p>
-              <p className="leading-relaxed">
+              <p className="mb-3 leading-relaxed">
                 In Spatters, the seed that serves as input for the algorithm, both for the initial mint and for mutations, 
                 is a large number computed as a combination of who is executing the code (blockchain wallet address) and 
                 when (blockchain block timestamp). Different people executing the same code at the same time would 
@@ -930,12 +925,12 @@ export default function Home() {
                 to mutate it and when.
               </p>
               <p className="leading-relaxed">
-                This means a Spatter isn&apos;t just art you own: it&apos;s art you help shape. The full history of every change 
-                is preserved on-chain, creating a visual timeline of everyone who held and influenced that piece. 
-                Your Spatter becomes a collaborative work between the original artist, the first minter, you, and 
+                This means a Spatter isn&apos;t just art you own: <strong>it&apos;s art you help shape</strong>. The full 
+                history of every change is preserved on-chain, creating a visual timeline of everyone who held and influenced 
+                that piece. Your Spatter becomes a collaborative work between the original artist, the first minter, you, and 
                 every future collector who chooses to leave their mark. Instead of a snapshot of a single moment of creation, 
-                a Spatter is never a completed creation, but rather a constantly evolving artwork that carries within it 
-                a little piece of everyone it has belonged to.
+                a Spatter is never a completed piece, but rather a constantly evolving artwork that carries within it 
+                a little part of everyone it has belonged to.
               </p>
             </div>
           </div>

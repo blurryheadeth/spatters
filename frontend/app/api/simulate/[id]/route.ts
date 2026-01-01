@@ -181,19 +181,34 @@ export async function GET(
   const simCount = simulatedMutations.length;
   const realCount = realMutations.length;
 
-  // Build the simulation HTML
+  // Build the simulation HTML with responsive CSS matching /api/token/[id]
   const simulationHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Spatter #${tokenId} - Simulation</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { 
-      width: 100%; 
-      min-height: 100%; 
-      background: #000;
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #EBE5D9;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* p5.js creates a canvas element - scale it to fit viewport while maintaining aspect ratio */
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
     }
     #sim-banner {
       position: fixed;
@@ -213,7 +228,7 @@ export async function GET(
 </head>
 <body>
   <div id="sim-banner">SIMULATION: ${realCount} real + ${simCount} simulated mutation${simCount !== 1 ? 's' : ''}</div>
-  <div id="status" style="position:fixed;top:40px;left:10px;color:#fff;font-family:monospace;z-index:9999;background:rgba(0,0,0,0.7);padding:5px 10px;border-radius:4px;"></div>
+  <div id="status" style="position:fixed;top:40px;left:10px;color:#000;font-family:monospace;z-index:9999;background:rgba(255,255,255,0.8);padding:5px 10px;border-radius:4px;"></div>
   
   <!-- Inject spatters.js from on-chain -->
   <script>
