@@ -760,7 +760,7 @@ export default function Home() {
               <div className="flex items-start gap-4">
                 <div 
                   className="w-10 h-10 flex-shrink-0 flex items-center justify-center font-black border-2"
-                  style={{ backgroundColor: COLORS.green, borderColor: COLORS.black, color: COLORS.black }}
+                  style={{ backgroundColor: COLORS.green, borderColor: COLORS.black, color: COLORS.white }}
                 >
                   4
                 </div>
