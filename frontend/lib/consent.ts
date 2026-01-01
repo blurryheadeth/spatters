@@ -13,29 +13,65 @@ export interface ConsentData {
 
 /**
  * Generate the consent message that users will sign
+ * This message must be explicit and unambiguous about all key terms
  */
 export function generateConsentMessage(walletAddress: string): string {
   const timestamp = new Date().toISOString();
-  return `I hereby acknowledge that I have read, understood, and agree to be bound by the Spatters Terms of Service, Privacy Policy, Cookie Policy, NFT License Agreement, Copyright Policy, and Risk Disclosure as published at spatters.art/legal.
+  return `SPATTERS NFT MINTING AGREEMENT
 
-I understand that:
-- Minting fees are non-refundable under any circumstances
-- The smart contract has not been audited
-- NFTs have no guaranteed secondary market value
-- The artist may mint tokens without paying minting fees
-- I am at least 18 years old or the legal age of majority in my jurisdiction
-- I am not located in a sanctioned jurisdiction
+By signing this message, I confirm that I have read, understood, and agree to be legally bound by all of the following documents published at spatters.art/legal:
 
-Wallet: ${walletAddress}
+1. Terms of Service (spatters.art/legal/terms)
+2. Privacy Policy (spatters.art/legal/privacy)
+3. Cookie Policy (spatters.art/legal/cookies)
+4. NFT License Agreement (spatters.art/legal/nft-license)
+5. Copyright Policy (spatters.art/legal/copyright)
+6. Risk Disclosure (spatters.art/legal/risk-disclosure)
+
+I EXPLICITLY ACKNOWLEDGE AND AGREE THAT:
+
+NON-REFUNDABLE PAYMENT:
+- The minting fee I am about to pay is NON-REFUNDABLE under ANY circumstances.
+- If I fail to select one of the three artwork options within the 55-minute window, my minting fee will NOT be refunded.
+- If I abandon the minting process for any reason, my minting fee will NOT be refunded.
+- There are no exceptions to this non-refund policy.
+
+NOT AN INVESTMENT:
+- I am NOT paying this minting fee for investment purposes.
+- I am NOT purchasing this NFT with any expectation of profit or financial return.
+- I understand this is a purchase of digital art, not a financial instrument or security.
+
+NO GUARANTEED VALUE:
+- I understand and accept that the NFT I receive may have ZERO monetary value.
+- I do NOT expect the NFT to have any resale value whatsoever.
+- I accept that there may be no secondary market for this NFT.
+- I will not hold the artist or project liable for any financial losses.
+
+UNAUDITED SMART CONTRACT:
+- The smart contract has NOT been audited by any third party.
+- I accept all risks associated with interacting with unaudited blockchain code.
+
+ARTIST MINTING RIGHTS:
+- The artist may mint and sell tokens without paying the minting fee.
+- This may affect secondary market value and I accept this risk.
+
+ELIGIBILITY:
+- I am at least 18 years old or the legal age of majority in my jurisdiction.
+- I am NOT located in a sanctioned or restricted jurisdiction.
+- I am legally permitted to interact with blockchain applications.
+
+I HAVE READ ALL REFERENCED DOCUMENTS IN FULL AND AGREE TO ALL TERMS.
+
+Wallet Address: ${walletAddress}
 Terms Version: ${CURRENT_TERMS_VERSION}
-Signed at: ${timestamp}`;
+Signature Timestamp: ${timestamp}`;
 }
 
 /**
  * Parse the timestamp from a signed consent message
  */
 export function parseSignedAt(message: string): string {
-  const match = message.match(/Signed at: (.+)$/);
+  const match = message.match(/Signature Timestamp: (.+)$/m);
   return match ? match[1] : new Date().toISOString();
 }
 
@@ -44,7 +80,7 @@ export function parseSignedAt(message: string): string {
  */
 export function verifyConsentMessage(message: string, walletAddress: string): boolean {
   // Check that the message contains the expected wallet address
-  if (!message.includes(`Wallet: ${walletAddress}`)) {
+  if (!message.includes(`Wallet Address: ${walletAddress}`)) {
     return false;
   }
   
@@ -53,14 +89,18 @@ export function verifyConsentMessage(message: string, walletAddress: string): bo
     return false;
   }
   
-  // Check that it contains the key acknowledgments
+  // Check that it contains the key acknowledgments (case-insensitive for robustness)
   const requiredPhrases = [
-    'Minting fees are non-refundable',
-    'smart contract has not been audited',
-    'no guaranteed secondary market value',
+    'NON-REFUNDABLE',
+    'NOT an investment',
+    'NOT expect the NFT to have any resale value',
+    'ZERO monetary value',
+    'NOT been audited',
     'at least 18 years old',
+    'I HAVE READ ALL REFERENCED DOCUMENTS',
   ];
   
-  return requiredPhrases.every(phrase => message.includes(phrase));
+  const upperMessage = message.toUpperCase();
+  return requiredPhrases.every(phrase => upperMessage.includes(phrase.toUpperCase()));
 }
 

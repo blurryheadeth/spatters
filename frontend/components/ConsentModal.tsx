@@ -26,13 +26,15 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
   const [hasReadTerms, setHasReadTerms] = useState(false);
   const [hasReadPrivacy, setHasReadPrivacy] = useState(false);
   const [hasReadRisks, setHasReadRisks] = useState(false);
+  const [acknowledgesNoRefund, setAcknowledgesNoRefund] = useState(false);
+  const [acknowledgesNotInvestment, setAcknowledgesNotInvestment] = useState(false);
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { signMessageAsync } = useSignMessage();
 
-  const allChecked = hasReadTerms && hasReadPrivacy && hasReadRisks && isAgeConfirmed;
+  const allChecked = hasReadTerms && hasReadPrivacy && hasReadRisks && acknowledgesNoRefund && acknowledgesNotInvestment && isAgeConfirmed;
 
   const handleSign = async () => {
     if (!allChecked) return;
@@ -84,7 +86,7 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
               type="checkbox"
               checked={hasReadTerms}
               onChange={(e) => setHasReadTerms(e.target.checked)}
-              className="mt-1 w-5 h-5"
+              className="mt-1 w-5 h-5 flex-shrink-0"
               style={{ accentColor: COLORS.green }}
             />
             <span className="text-sm" style={{ color: COLORS.black }}>
@@ -108,7 +110,7 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
               type="checkbox"
               checked={hasReadPrivacy}
               onChange={(e) => setHasReadPrivacy(e.target.checked)}
-              className="mt-1 w-5 h-5"
+              className="mt-1 w-5 h-5 flex-shrink-0"
               style={{ accentColor: COLORS.green }}
             />
             <span className="text-sm" style={{ color: COLORS.black }}>
@@ -128,7 +130,7 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
               type="checkbox"
               checked={hasReadRisks}
               onChange={(e) => setHasReadRisks(e.target.checked)}
-              className="mt-1 w-5 h-5"
+              className="mt-1 w-5 h-5 flex-shrink-0"
               style={{ accentColor: COLORS.green }}
             />
             <span className="text-sm" style={{ color: COLORS.black }}>
@@ -136,17 +138,55 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
               <Link href="/legal/risk-disclosure" target="_blank" className="underline font-bold" style={{ color: COLORS.red }}>
                 Risk Disclosure
               </Link>
-              , including that minting fees are <strong>non-refundable</strong>, the smart contract is{' '}
-              <strong>unaudited</strong>, and NFTs have <strong>no guaranteed value</strong>
+              , including that the smart contract is <strong>unaudited</strong> and the artist may mint tokens without paying the minting fee
             </span>
           </label>
+
+          {/* Key explicit acknowledgments */}
+          <div 
+            className="p-3 border-2 space-y-3"
+            style={{ borderColor: COLORS.red, backgroundColor: '#fff5f5' }}
+          >
+            <p className="text-xs font-bold" style={{ color: COLORS.red }}>
+              IMPORTANT: Please read and acknowledge the following:
+            </p>
+            
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acknowledgesNoRefund}
+                onChange={(e) => setAcknowledgesNoRefund(e.target.checked)}
+                className="mt-1 w-5 h-5 flex-shrink-0"
+                style={{ accentColor: COLORS.red }}
+              />
+              <span className="text-sm" style={{ color: COLORS.black }}>
+                I understand that my minting fee is <strong style={{ color: COLORS.red }}>NON-REFUNDABLE under ANY circumstances</strong>, 
+                including if I fail to select one of the three artwork options within the 55-minute window
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acknowledgesNotInvestment}
+                onChange={(e) => setAcknowledgesNotInvestment(e.target.checked)}
+                className="mt-1 w-5 h-5 flex-shrink-0"
+                style={{ accentColor: COLORS.red }}
+              />
+              <span className="text-sm" style={{ color: COLORS.black }}>
+                I am <strong style={{ color: COLORS.red }}>NOT</strong> paying this minting fee for investment purposes. 
+                I understand the NFT I receive may have <strong style={{ color: COLORS.red }}>ZERO monetary value</strong> and 
+                I do <strong style={{ color: COLORS.red }}>NOT</strong> expect any resale value or financial return
+              </span>
+            </label>
+          </div>
 
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={isAgeConfirmed}
               onChange={(e) => setIsAgeConfirmed(e.target.checked)}
-              className="mt-1 w-5 h-5"
+              className="mt-1 w-5 h-5 flex-shrink-0"
               style={{ accentColor: COLORS.green }}
             />
             <span className="text-sm" style={{ color: COLORS.black }}>
