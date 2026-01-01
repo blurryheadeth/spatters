@@ -1,54 +1,25 @@
 import type { NextConfig } from "next";
 
-// Content Security Policy configuration
-// This protects users from XSS attacks and clickjacking while allowing all necessary functionality
-// Note: connect-src uses 'https:' to allow any HTTPS endpoint (required for various RPC providers)
-const ContentSecurityPolicy = `
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
-  style-src 'self' 'unsafe-inline';
-  font-src 'self' data:;
-  img-src 'self' data: blob: https:;
-  connect-src 'self' https: wss:;
-  frame-src 'self';
-  frame-ancestors 'self';
-  object-src 'none';
-  base-uri 'self';
-  form-action 'self';
-`.replace(/\s{2,}/g, ' ').trim();
-
 const nextConfig: NextConfig = {
-  // Security and CORS headers
+  // CORS headers for external platform compatibility (Etherscan, MetaMask, OpenSea)
+  // Note: CSP was removed because it conflicted with iframe-based preview functionality.
+  // The main security protections for this dApp come from:
+  // 1. Wallet-based authentication (no cookies/sessions to steal)
+  // 2. Signature verification on all state-changing operations
+  // 3. React's built-in XSS protection (auto-escaping)
   async headers() {
     return [
       {
-        // Apply CSP and security headers to all pages
+        // Security headers for all routes (non-breaking)
         source: '/:path*',
         headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: ContentSecurityPolicy,
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
       {
-        // CORS headers for API routes (external platform compatibility)
+        // CORS headers for API routes
         source: '/api/:path*',
         headers: [
           { key: 'Access-Control-Allow-Origin', value: '*' },
