@@ -133,6 +133,8 @@ export async function GET(request: Request) {
       display: block;
     }
   </style>
+  <!-- Pako for gzip decompression fallback (older browsers without DecompressionStream) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 </head>
 <body>
   <div id="status" style="position:fixed;top:10px;left:10px;color:#fff;font-family:monospace;z-index:9999;background:rgba(0,0,0,0.7);padding:5px 10px;border-radius:4px;"></div>
@@ -191,10 +193,23 @@ ${spattersScript}
     }
     
     async function decompressGzip(compressedData) {
-      const ds = new DecompressionStream('gzip');
-      const blob = new Blob([compressedData]);
-      const decompressedStream = blob.stream().pipeThrough(ds);
-      return await new Response(decompressedStream).text();
+      // Use DecompressionStream if available, otherwise fall back to pako
+      if (typeof DecompressionStream !== 'undefined') {
+        try {
+          const ds = new DecompressionStream('gzip');
+          const blob = new Blob([compressedData]);
+          const decompressedStream = blob.stream().pipeThrough(ds);
+          return await new Response(decompressedStream).text();
+        } catch (e) {
+          console.warn('DecompressionStream failed, falling back to pako:', e);
+        }
+      }
+      // Fallback to pako for older browsers (e.g., Safari iOS < 16.4)
+      if (typeof pako !== 'undefined') {
+        const decompressed = pako.inflate(compressedData, { to: 'string' });
+        return decompressed;
+      }
+      throw new Error('No decompression method available. Please use a modern browser.');
     }
     
     const GET_DEPENDENCY_SCRIPT_SELECTOR = '0x518cb3df';
