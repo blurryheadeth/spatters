@@ -117,9 +117,9 @@ export default function OwnerMint() {
   // Dynamic countdown timer for remaining mint time
   const [remainingMinutes, setRemainingMinutes] = useState<number>(45);
   
-  // Commit step modal with 15-second countdown
+  // Commit step modal with 30-second countdown
   const [showCommitModal, setShowCommitModal] = useState(false);
-  const [commitCountdown, setCommitCountdown] = useState(15);
+  const [commitCountdown, setCommitCountdown] = useState(30);
   
   // Cache-bust timestamp - refreshed when preview seeds change to avoid stale cached previews
   const cacheBustRef = useRef<number>(Date.now());
@@ -320,7 +320,7 @@ export default function OwnerMint() {
   useEffect(() => {
     if (isCommitConfirmed) {
       setShowCommitModal(true);
-      setCommitCountdown(15);
+      setCommitCountdown(30);
     }
   }, [isCommitConfirmed]);
 
@@ -563,7 +563,7 @@ export default function OwnerMint() {
     setFinishedPreviews(new Set()); // Clear finished tracking
     setIframeHeights({}); // Clear iframe heights
     setShowCommitModal(false);
-    setCommitCountdown(15);
+    setCommitCountdown(30);
     setError('');
     resetCommit();
     resetRequest();
@@ -1325,7 +1325,7 @@ export default function OwnerMint() {
           </div>
         )}
 
-        {/* Commit Confirmed Modal with 15s countdown */}
+        {/* Commit Confirmed Modal with 30s countdown */}
         {showCommitModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
             <div 

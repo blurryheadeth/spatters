@@ -381,7 +381,7 @@ function MutationInterface({
         </button>
       )}
 
-      {/* Commit Confirmed Modal with 15s countdown */}
+      {/* Commit Confirmed Modal with 30s countdown */}
       {showCommitModal && (
         <div className="fixed inset-0 flex items-center justify-center z-[60] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
           <div 
@@ -977,7 +977,7 @@ export default function MutatePage() {
 
   // Mutation commit modal state
   const [showMutationCommitModal, setShowMutationCommitModal] = useState(false);
-  const [mutationCommitCountdown, setMutationCommitCountdown] = useState(15);
+  const [mutationCommitCountdown, setMutationCommitCountdown] = useState(30);
   const [pendingMutationType, setPendingMutationType] = useState<string | null>(null);
 
   // Build milestone data array
@@ -1039,7 +1039,7 @@ export default function MutatePage() {
   useEffect(() => {
     if (isCommitConfirmed) {
       setShowMutationCommitModal(true);
-      setMutationCommitCountdown(15);
+      setMutationCommitCountdown(30);
     }
   }, [isCommitConfirmed]);
 
@@ -1059,7 +1059,7 @@ export default function MutatePage() {
     resetCommit();
     resetApply();
     setShowMutationCommitModal(false);
-    setMutationCommitCountdown(15);
+    setMutationCommitCountdown(30);
     setPendingMutationType(null);
   };
 
