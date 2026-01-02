@@ -969,6 +969,12 @@ export default function PublicMint() {
           </div>
         )}
 
+        <div className="border-2 p-4 mb-4" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
+          <p className="text-sm font-medium" style={{ color: COLORS.white }}>
+            ⏱️ <strong>Please be patient:</strong> Generating your 3 preview options can take up to 1-2 minutes per option. The page may appear unresponsive during this process — please wait and do not reload the page.
+          </p>
+        </div>
+
         {hasPendingToView ? (
           /* User has pending options to view */
           <button

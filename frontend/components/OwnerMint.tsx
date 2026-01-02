@@ -1054,6 +1054,12 @@ export default function OwnerMint() {
               </div>
             )}
 
+            <div className="border-2 p-4" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
+              <p className="text-sm font-medium" style={{ color: COLORS.white }}>
+                ⏱️ <strong>Please be patient:</strong> Generating your 3 preview options can take up to 1-2 minutes per option. The page may appear unresponsive during this process — please wait and do not reload the page.
+              </p>
+            </div>
+
             <button
               onClick={() => setShowConfirmModal(true)}
               disabled={isCommitPending || isCommitConfirming || isRequestPending || isRequestConfirming || isLoadingPreviews}
