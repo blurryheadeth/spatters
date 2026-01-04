@@ -904,7 +904,9 @@ export default function Home() {
               <p className="leading-relaxed">
                 The blockchain also ensures permanence: unlike traditional digital art that relies on servers and hosting, 
                 fully on-chain generative art exists as long as the blockchain itself does. The code, the seeds, and all 
-                the data needed to recreate the artwork live permanently in a decentralized, censorship-resistant system.
+                the data needed to recreate the artwork live permanently in a decentralized, censorship-resistant system. 
+                This means that even if this website disappears, anyone can recreate the images associated with your Spatter 
+                as long as Ethereum exists.
               </p>
             </div>
 
