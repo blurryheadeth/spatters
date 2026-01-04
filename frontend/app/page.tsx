@@ -502,7 +502,8 @@ export default function Home() {
                   </span>
                   <button
                     onClick={clearDemoSimulations}
-                    className="text-xs font-bold px-3 py-1 border-2 hover:opacity-80 transition-opacity"
+                    disabled={isSimulationLoading}
+                    className="text-xs font-bold px-3 py-1 border-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ backgroundColor: COLORS.white, borderColor: COLORS.black, color: COLORS.black }}
                   >
                     Clear & Show Real
@@ -549,14 +550,15 @@ export default function Home() {
                 </p>
                 <button
                   onClick={() => setIsSimulationModalOpen(true)}
-                  className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70"
+                  disabled={isSimulationLoading}
+                  className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ 
                     backgroundColor: COLORS.blue, 
                     borderColor: COLORS.black,
                     color: COLORS.white
                   }}
                 >
-                  🔮 Add Simulated Mutation
+                  {isSimulationLoading ? '⏳ Generating...' : '🔮 Add Simulated Mutation'}
                 </button>
               </div>
 
@@ -569,7 +571,8 @@ export default function Home() {
                     </span>
                     <button
                       onClick={clearDemoSimulations}
-                      className="text-xs underline hover:opacity-70"
+                      disabled={isSimulationLoading}
+                      className="text-xs underline hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ color: COLORS.red }}
                     >
                       Clear All
@@ -893,10 +896,10 @@ export default function Home() {
               <p className="mb-3 leading-relaxed">
                 Blockchain technology solves a fundamental challenge in generative art: a source of randomness and permanence. 
                 When you mint a generative NFT, the blockchain can provide a unique &quot;seed&quot;, which is a pseudo-random 
-                value derived from transaction data that no one could have predicted before the transaction was sent. 
-                This seed can serve as input for the artist&apos;s algorithm to generate a one-of-a-kind artwork. Because the algorithm 
-                and seed are stored on-chain, anyone can verify that your specific artwork was genuinely generated at mint time, 
-                not hand-picked or modified later.
+                value derived from transaction data that no one could have predicted before the transaction was sent. This seed 
+                can serve as input for the artist&apos;s algorithm to generate a one-of-a-kind artwork. Because the algorithm 
+                and seed are stored on-chain, anyone can verify that your specific artwork was genuinely generated at the time it 
+                was created (or &quot;minted&quot;, since creating an NFT is also called &quot;minting&quot;).
               </p>
               <p className="leading-relaxed">
                 The blockchain also ensures permanence: unlike traditional digital art that relies on servers and hosting, 
