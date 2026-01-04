@@ -554,9 +554,10 @@ function MutationInterface({
 interface SimulationInterfaceProps {
   onSimulate: (mutationType: string) => void;
   simulationCount: number;
+  isLoading: boolean;
 }
 
-function SimulationInterface({ onSimulate, simulationCount }: SimulationInterfaceProps) {
+function SimulationInterface({ onSimulate, simulationCount, isLoading }: SimulationInterfaceProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedPointsSubgroup, setSelectedPointsSubgroup] = useState<string | null>(null);
@@ -601,14 +602,15 @@ function SimulationInterface({ onSimulate, simulationCount }: SimulationInterfac
     <div>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70"
+        disabled={isLoading}
+        className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ 
           backgroundColor: COLORS.blue, 
           borderColor: COLORS.black,
           color: COLORS.white
         }}
       >
-        🔮 Add Simulated Mutation
+        {isLoading ? '⏳ Generating...' : '🔮 Add Simulated Mutation'}
       </button>
 
       {/* Simulation Selection Modal */}
@@ -851,12 +853,14 @@ export default function MutatePage() {
   // Simulated mutations state (persists only while page is open)
   // Each entry is [seed, mutationType] where seed is timestamp-based
   const [simulatedMutations, setSimulatedMutations] = useState<Array<[number, string]>>([]);
+  const [isSimulationLoading, setIsSimulationLoading] = useState(false);
 
-  // Listen for iframe dimensions
+  // Listen for iframe dimensions and simulation completion
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'spatters-canvas-ready') {
         setIframeHeight(event.data.height || 600);
+        setIsSimulationLoading(false);
       }
     };
     window.addEventListener('message', handleMessage);
@@ -1068,6 +1072,7 @@ export default function MutatePage() {
     // Use current timestamp as the seed (similar to how real mutations use block.timestamp)
     const seed = Math.floor(Date.now() / 1000);
     setSimulatedMutations(prev => [...prev, [seed, mutationType]]);
+    setIsSimulationLoading(true);
     // Force iframe reload to show updated simulation
     setIframeKey(prev => prev + 1);
   };
@@ -1341,7 +1346,8 @@ export default function MutatePage() {
               </span>
               <button
                 onClick={clearSimulations}
-                className="text-xs font-bold px-3 py-1 border-2 hover:opacity-80 transition-opacity"
+                disabled={isSimulationLoading}
+                className="text-xs font-bold px-3 py-1 border-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: COLORS.white, borderColor: COLORS.black, color: COLORS.black }}
               >
                 Clear & Show Real
@@ -1476,6 +1482,26 @@ export default function MutatePage() {
               Preview how mutations would look without executing a transaction. Simulations reset when you leave this page.
             </p>
             
+            {/* Red warning about generation time */}
+            <div className="border-2 p-3 mb-3" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
+              <p className="text-xs font-medium" style={{ color: COLORS.white }}>
+                ⏱️ <strong>Please be patient:</strong> Generating a mutation preview can take up to 1-2 minutes. The page may appear unresponsive — please wait and do not reload.
+              </p>
+            </div>
+
+            {/* Loading spinner */}
+            {isSimulationLoading && (
+              <div className="flex items-center gap-2 mb-3 p-2 border-2" style={{ backgroundColor: COLORS.background, borderColor: COLORS.black }}>
+                <div 
+                  className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
+                  style={{ borderColor: COLORS.blue, borderTopColor: 'transparent' }}
+                />
+                <span className="text-xs font-medium" style={{ color: COLORS.black }}>
+                  Generating preview...
+                </span>
+              </div>
+            )}
+            
             {simulatedMutations.length > 0 && (
               <div className="mb-3 p-2 border-2" style={{ backgroundColor: COLORS.background, borderColor: COLORS.blue }}>
                 <div className="flex justify-between items-center mb-2">
@@ -1484,7 +1510,8 @@ export default function MutatePage() {
                   </span>
                   <button
                     onClick={clearSimulations}
-                    className="text-xs underline hover:opacity-70"
+                    disabled={isSimulationLoading}
+                    className="text-xs underline hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ color: COLORS.red }}
                   >
                     Clear All
@@ -1507,6 +1534,7 @@ export default function MutatePage() {
             <SimulationInterface
               onSimulate={handleSimulateMutation}
               simulationCount={simulatedMutations.length}
+              isLoading={isSimulationLoading}
             />
           </div>
         </div>
