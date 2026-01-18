@@ -714,8 +714,8 @@ export default function Home() {
                     Random Parameters
                   </h4>
                   <p style={{ color: COLORS.black }}>
-                    The algorithm begins by determining a set of random parameters from the seed: aspect ratio (square, wide, or tall), 
-                    the number of colored sections (2-5), which colors to use from the palette, and how many circles and lines to include.
+                    The algorithm begins by determining a set of random parameters from the seed, such as aspect ratio (square, wide, or tall), 
+                    the number of colored sections (2-5), which colors to use from the palette, or how many circles and lines to include.
                   </p>
                 </div>
               </div>
