@@ -121,6 +121,14 @@ export default function PublicMint() {
     query: { staleTime: 0 }, // Always fetch fresh data
   });
 
+  // Read pending commit to check if user has completed step 1 but not step 2
+  const { data: pendingCommitData, refetch: refetchPendingCommit } = useReadContract({
+    address: contractAddress as `0x${string}`,
+    abi: SpattersABI.abi,
+    functionName: 'pendingCommit',
+    query: { staleTime: 0 }, // Always fetch fresh data
+  });
+
   // Commit mint transaction (Step 1 - pays the fee)
   const { 
     data: commitHash, 
@@ -285,6 +293,35 @@ export default function PublicMint() {
       }
     }
   }, [pendingRequest, address]);
+
+  // Check for pending commit (step 1 complete, step 2 not started) and auto-open modal
+  useEffect(() => {
+    if (!pendingCommitData || !address || !isCurrentUserPending) return;
+    
+    const commit = pendingCommitData as { commitBlock: bigint; timestamp: bigint; hasCustomPalette: boolean; isOwnerMint: boolean };
+    
+    // Check if there's a pending commit for a public mint (not owner mint)
+    if (commit.timestamp > BigInt(0) && !commit.isOwnerMint) {
+      // Check if request hasn't been made yet
+      const request = pendingRequest as { timestamp: bigint } | undefined;
+      if (!request || request.timestamp === BigInt(0)) {
+        // Check if commit hasn't expired
+        const commitTime = Number(commit.timestamp);
+        const expirationTime = commitTime + (45 * 60);
+        const now = Math.floor(Date.now() / 1000);
+        
+        if (now < expirationTime) {
+          // Auto-open the confirmation modal
+          setShowConfirmModal(true);
+          
+          // Calculate how much time has passed since commit
+          const elapsed = now - commitTime;
+          const countdownRemaining = Math.max(0, 30 - elapsed);
+          setCommitCountdown(Math.floor(countdownRemaining));
+        }
+      }
+    }
+  }, [pendingCommitData, address, isCurrentUserPending, pendingRequest]);
 
   // Update pending remaining time every second
   useEffect(() => {
