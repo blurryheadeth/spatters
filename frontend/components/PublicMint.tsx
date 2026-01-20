@@ -298,15 +298,20 @@ export default function PublicMint() {
   useEffect(() => {
     if (!pendingCommitData || !address || !isCurrentUserPending) return;
     
-    const commit = pendingCommitData as { commitBlock: bigint; timestamp: bigint; hasCustomPalette: boolean; isOwnerMint: boolean };
+    // pendingCommit returns tuple: [commitBlock, timestamp, hasCustomPalette, isOwnerMint]
+    const commit = pendingCommitData as [bigint, bigint, boolean, boolean];
+    const commitTimestamp = commit[1];
+    const isOwnerMint = commit[3];
     
     // Check if there's a pending commit for a public mint (not owner mint)
-    if (commit.timestamp > BigInt(0) && !commit.isOwnerMint) {
-      // Check if request hasn't been made yet
-      const request = pendingRequest as { timestamp: bigint } | undefined;
-      if (!request || request.timestamp === BigInt(0)) {
+    if (commitTimestamp > BigInt(0) && !isOwnerMint) {
+      // Check if request hasn't been made yet (seeds not generated)
+      const request = pendingRequest as { seeds: string[]; timestamp: bigint } | undefined;
+      const hasSeeds = request?.seeds?.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
+      
+      if (!hasSeeds) {
         // Check if commit hasn't expired
-        const commitTime = Number(commit.timestamp);
+        const commitTime = Number(commitTimestamp);
         const expirationTime = commitTime + (45 * 60);
         const now = Math.floor(Date.now() / 1000);
         
