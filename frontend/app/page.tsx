@@ -175,6 +175,55 @@ export default function Home() {
   const isOwner = address && ownerAddress && 
     address.toLowerCase() === (ownerAddress as string).toLowerCase();
 
+  // Read pending commit to auto-switch tabs if user has a pending mint
+  const { data: pendingCommitData } = useReadContract({
+    address: contractAddress as `0x${string}`,
+    abi: SpattersABI.abi,
+    functionName: 'pendingCommit',
+    query: { staleTime: 0 },
+  });
+
+  // Read active mint requester to verify the commit belongs to current user
+  const { data: mintSelectionData } = useReadContract({
+    address: contractAddress as `0x${string}`,
+    abi: SpattersABI.abi,
+    functionName: 'isMintSelectionInProgress',
+    query: { staleTime: 0 },
+  });
+
+  const activeMintRequester = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[1] : null;
+
+  // Auto-switch to correct tab if user has a pending commit
+  useEffect(() => {
+    if (!pendingCommitData || !address || !activeMintRequester) return;
+    
+    // Verify the commit belongs to the current user
+    if (activeMintRequester.toLowerCase() !== address.toLowerCase()) return;
+    
+    // pendingCommit returns tuple: [commitBlock, timestamp, hasCustomPalette, isOwnerMint]
+    const commit = pendingCommitData as [bigint, bigint, boolean, boolean];
+    const commitTimestamp = commit[1];
+    const isOwnerMint = commit[3];
+    
+    // If there's a valid pending commit
+    if (commitTimestamp > BigInt(0)) {
+      // Check if commit hasn't expired (45 minutes)
+      const commitTime = Number(commitTimestamp);
+      const expirationTime = commitTime + (45 * 60);
+      const now = Math.floor(Date.now() / 1000);
+      
+      if (now < expirationTime) {
+        console.log('[Spatters Page] Auto-switching tab for pending commit:', { isOwnerMint });
+        // Auto-switch to the correct tab based on commit type
+        if (isOwnerMint && isOwner) {
+          setActiveTab('owner');
+        } else if (!isOwnerMint) {
+          setActiveTab('public');
+        }
+      }
+    }
+  }, [pendingCommitData, address, activeMintRequester, isOwner]);
+
   // Demo simulation state for Spatter #1
   const [demoSimulations, setDemoSimulations] = useState<Array<[number, string]>>([]);
   const [demoIframeKey, setDemoIframeKey] = useState(0);
