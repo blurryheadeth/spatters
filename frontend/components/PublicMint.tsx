@@ -791,8 +791,8 @@ export default function PublicMint() {
     );
   }
 
-  // Show cooldown message with live countdown
-  if (isCooldownActive && previewSeeds.length === 0) {
+  // Show cooldown message with live countdown (but NOT if user has their own pending commit)
+  if (isCooldownActive && previewSeeds.length === 0 && !isCurrentUserPending) {
     return (
       <div className="space-y-6">
         <div className="border-2 p-6" style={{ backgroundColor: COLORS.blue, borderColor: COLORS.black }}>
