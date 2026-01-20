@@ -213,7 +213,6 @@ export default function Home() {
       const now = Math.floor(Date.now() / 1000);
       
       if (now < expirationTime) {
-        console.log('[Spatters Page] Auto-switching tab for pending commit:', { isOwnerMint });
         // Auto-switch to the correct tab based on commit type
         if (isOwnerMint && isOwner) {
           setActiveTab('owner');
