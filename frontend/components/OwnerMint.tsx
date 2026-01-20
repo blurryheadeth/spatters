@@ -307,18 +307,58 @@ export default function OwnerMint() {
 
   // Check for pending commit (step 1 complete, step 2 not started) and auto-open modal
   useEffect(() => {
-    if (!pendingCommitData || !address || !isOwner) return;
+    // Debug logging
+    console.log('[Spatters Owner Mint Debug] Checking pending commit:', {
+      hasPendingCommitData: !!pendingCommitData,
+      pendingCommitData: pendingCommitData,
+      address,
+      isOwner,
+      activeMintRequester,
+    });
+
+    if (!pendingCommitData || !address || !isOwner) {
+      console.log('[Spatters Owner Mint Debug] Early return: missing data or not owner');
+      return;
+    }
     
     // pendingCommit returns tuple: [commitBlock, timestamp, hasCustomPalette, isOwnerMint]
     const commit = pendingCommitData as [bigint, bigint, boolean, boolean];
+    const commitBlock = commit[0];
     const commitTimestamp = commit[1];
+    const hasCustomPalette = commit[2];
     const isOwnerMint = commit[3];
+    
+    console.log('[Spatters Owner Mint Debug] Parsed commit:', {
+      commitBlock: commitBlock?.toString(),
+      commitTimestamp: commitTimestamp?.toString(),
+      hasCustomPalette,
+      isOwnerMint,
+    });
     
     // Check if there's a pending commit for an owner mint
     if (commitTimestamp > BigInt(0) && isOwnerMint) {
+      console.log('[Spatters Owner Mint Debug] Valid owner mint commit found');
+      
+      // Verify this commit belongs to the current user
+      const userIsRequester = activeMintRequester && 
+        activeMintRequester.toLowerCase() === address.toLowerCase();
+      
+      console.log('[Spatters Owner Mint Debug] User is requester:', userIsRequester);
+      
+      if (!userIsRequester) {
+        console.log('[Spatters Owner Mint Debug] Early return: user is not the active requester');
+        return;
+      }
+      
       // Check if request hasn't been made yet (seeds not generated)
       const request = pendingRequest as { seeds: string[]; timestamp: bigint } | undefined;
       const hasSeeds = request?.seeds?.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
+      
+      console.log('[Spatters Owner Mint Debug] Request state:', {
+        hasSeeds,
+        requestTimestamp: request?.timestamp?.toString(),
+        seeds: request?.seeds,
+      });
       
       if (!hasSeeds) {
         // Check if commit hasn't expired
@@ -326,7 +366,15 @@ export default function OwnerMint() {
         const expirationTime = commitTime + (45 * 60);
         const now = Math.floor(Date.now() / 1000);
         
+        console.log('[Spatters Owner Mint Debug] Time check:', {
+          commitTime,
+          expirationTime,
+          now,
+          isExpired: now >= expirationTime,
+        });
+        
         if (now < expirationTime) {
+          console.log('[Spatters Owner Mint Debug] ✅ Opening confirmation modal!');
           // Auto-open the confirmation modal
           setShowConfirmModal(true);
           
@@ -334,10 +382,16 @@ export default function OwnerMint() {
           const elapsed = now - commitTime;
           const countdownRemaining = Math.max(0, 30 - elapsed);
           setCommitCountdown(Math.floor(countdownRemaining));
+        } else {
+          console.log('[Spatters Owner Mint Debug] Commit has expired');
         }
+      } else {
+        console.log('[Spatters Owner Mint Debug] Seeds already generated, no need to show modal');
       }
+    } else {
+      console.log('[Spatters Owner Mint Debug] No valid owner mint commit (timestamp=0 or not isOwnerMint)');
     }
-  }, [pendingCommitData, address, isOwner, pendingRequest]);
+  }, [pendingCommitData, address, isOwner, activeMintRequester, pendingRequest]);
 
   // Check if current user is the one with the pending mint
   const isCurrentUserPending = activeMintRequester && address && 
