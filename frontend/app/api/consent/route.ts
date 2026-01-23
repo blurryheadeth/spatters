@@ -15,6 +15,20 @@ const supabase = supabaseUrl && supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey)
   : null;
 
+/**
+ * POST /api/consent
+ * 
+ * Two operations based on presence of mintTxHash:
+ * 
+ * 1. INITIAL CONSENT (no mintTxHash):
+ *    - Called immediately after user signs consent message
+ *    - Stores consent with mint_completed=false
+ *    - Returns the consent record ID for later updates
+ * 
+ * 2. COMPLETION UPDATE (with mintTxHash):
+ *    - Called after mint transaction completes
+ *    - Updates existing record with tx hash and marks mint_completed=true
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -25,13 +39,14 @@ export async function POST(request: NextRequest) {
       termsVersion, 
       signedAt,
       mintTxHash,
+      commitTxHash,
       tokenId 
     } = body;
 
-    // Validate required fields
-    if (!walletAddress || !signature || !message || !termsVersion || !mintTxHash) {
+    // Validate required fields for initial consent
+    if (!walletAddress || !signature || !message || !termsVersion) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: walletAddress, signature, message, termsVersion' },
         { status: 400 }
       );
     }
@@ -76,38 +91,117 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Store the consent record
-    const { error: dbError } = await supabase
+    // CASE 1: Initial consent storage (no mintTxHash)
+    // Store immediately after signing, before mint fee is paid
+    if (!mintTxHash) {
+      console.log('[Consent API] Storing initial consent for wallet:', walletAddress);
+      
+      const { data, error: dbError } = await supabase
+        .from('mint_consent')
+        .insert({
+          wallet_address: walletAddress.toLowerCase(),
+          signature,
+          message,
+          terms_version: termsVersion,
+          signed_at: signedAt || new Date().toISOString(),
+          commit_tx_hash: commitTxHash?.toLowerCase() || null,
+          mint_completed: false,
+        })
+        .select('id')
+        .single();
+
+      if (dbError) {
+        console.error('Database error storing initial consent:', dbError);
+        return NextResponse.json(
+          { error: 'Failed to store consent', details: dbError.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ 
+        success: true,
+        message: 'Initial consent recorded successfully',
+        consentId: data.id,
+      });
+    }
+
+    // CASE 2: Completion update (mintTxHash provided)
+    // Update existing record when mint completes
+    console.log('[Consent API] Updating consent with mint completion for wallet:', walletAddress);
+    
+    // Find the most recent pending consent for this wallet/signature combo
+    const { data: existingConsent, error: findError } = await supabase
       .from('mint_consent')
-      .insert({
-        wallet_address: walletAddress.toLowerCase(),
-        signature,
-        message,
-        terms_version: termsVersion,
+      .select('id')
+      .eq('wallet_address', walletAddress.toLowerCase())
+      .eq('signature', signature)
+      .eq('mint_completed', false)
+      .order('signed_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (findError || !existingConsent) {
+      // No pending consent found - create a new complete record
+      // This handles edge cases where initial storage failed
+      console.log('[Consent API] No pending consent found, creating complete record');
+      
+      const { error: insertError } = await supabase
+        .from('mint_consent')
+        .insert({
+          wallet_address: walletAddress.toLowerCase(),
+          signature,
+          message,
+          terms_version: termsVersion,
+          signed_at: signedAt || new Date().toISOString(),
+          mint_tx_hash: mintTxHash.toLowerCase(),
+          token_id: tokenId || null,
+          mint_completed: true,
+        });
+
+      if (insertError) {
+        // Check if it's a duplicate (same tx hash)
+        if (insertError.code === '23505') {
+          return NextResponse.json({ 
+            success: true, 
+            message: 'Consent already recorded for this transaction' 
+          });
+        }
+        
+        console.error('Database error storing complete consent:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to store consent', details: insertError.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ 
+        success: true,
+        message: 'Complete consent recorded successfully (new record)'
+      });
+    }
+
+    // Update the existing pending consent
+    const { error: updateError } = await supabase
+      .from('mint_consent')
+      .update({
         mint_tx_hash: mintTxHash.toLowerCase(),
         token_id: tokenId || null,
-        signed_at: signedAt || new Date().toISOString(),
-      });
+        mint_completed: true,
+      })
+      .eq('id', existingConsent.id);
 
-    if (dbError) {
-      // Check if it's a duplicate (same tx hash)
-      if (dbError.code === '23505') {
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Consent already recorded for this transaction' 
-        });
-      }
-      
-      console.error('Database error storing consent:', dbError);
+    if (updateError) {
+      console.error('Database error updating consent:', updateError);
       return NextResponse.json(
-        { error: 'Failed to store consent' },
+        { error: 'Failed to update consent', details: updateError.message },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ 
       success: true,
-      message: 'Consent recorded successfully'
+      message: 'Consent updated with mint completion',
+      consentId: existingConsent.id,
     });
 
   } catch (error) {
@@ -137,7 +231,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('mint_consent')
-    .select('id, terms_version, stored_at')
+    .select('id, terms_version, stored_at, mint_completed')
     .eq('wallet_address', address.toLowerCase())
     .order('stored_at', { ascending: false })
     .limit(1);
@@ -152,4 +246,3 @@ export async function GET(request: NextRequest) {
     latestConsent: data?.[0] || null,
   });
 }
-

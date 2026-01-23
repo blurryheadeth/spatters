@@ -608,10 +608,11 @@ export default function PublicMint() {
       refetchMintStatus();
       refetchPendingRequest();
       
-      // Store consent to database NOW that mint payment is complete
-      // This is the only time consent is persisted (not on signature alone)
+      // Update consent record with mint completion details
+      // The initial consent was stored immediately after signing (before fee payment)
+      // Now we update it with the tx hash and token ID to mark it complete
       if (consentData && completeHash) {
-        console.log('[PublicMint] Storing consent for successful mint');
+        console.log('[PublicMint] Updating consent with mint completion');
         fetch('/api/consent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -623,13 +624,13 @@ export default function PublicMint() {
         })
           .then(res => res.json())
           .then(data => {
-            console.log('[PublicMint] Consent stored:', data);
-            // Clear sessionStorage after successful storage to database
+            console.log('[PublicMint] Consent updated with completion:', data);
+            // Clear sessionStorage after successful update
             sessionStorage.removeItem('spatters_consent_data');
           })
-          .catch(err => console.error('[PublicMint] Consent storage error:', err));
+          .catch(err => console.error('[PublicMint] Consent completion update error:', err));
       } else {
-        console.warn('[PublicMint] Cannot store consent - missing data:', {
+        console.warn('[PublicMint] Cannot update consent completion - missing data:', {
           hasConsentData: !!consentData,
           hasCompleteHash: !!completeHash,
         });
@@ -1148,6 +1149,31 @@ export default function PublicMint() {
           onConsent={(data) => {
             setConsentData(data);
             setShowConsentModal(false);
+            
+            // Store consent to database IMMEDIATELY after signing
+            // This ensures we have proof of consent BEFORE any fee is paid
+            console.log('[PublicMint] Storing initial consent immediately after signing');
+            fetch('/api/consent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                walletAddress: data.walletAddress,
+                signature: data.signature,
+                message: data.message,
+                termsVersion: data.termsVersion,
+                signedAt: data.signedAt,
+                // No mintTxHash yet - this is initial storage
+              }),
+            })
+              .then(res => res.json())
+              .then(result => {
+                console.log('[PublicMint] Initial consent stored:', result);
+              })
+              .catch(err => {
+                console.error('[PublicMint] Initial consent storage error:', err);
+                // Don't block the user - consent is also in sessionStorage
+              });
+            
             // After signing consent, show the 45-minute warning modal
             setShowConfirmModal(true);
           }}
