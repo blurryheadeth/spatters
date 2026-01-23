@@ -1151,8 +1151,19 @@ export default function PublicMint() {
                 </p>
               </div>
 
+              <div className="border-2 p-4" style={{ backgroundColor: '#f2c945', borderColor: '#000000' }}>
+                <p className="text-sm font-bold mb-2" style={{ color: '#000000' }}>
+                  ⚠️ Have You Tested Your Hardware?
+                </p>
+                <p className="text-sm" style={{ color: '#000000' }}>
+                  If you haven&apos;t already, <strong>please test your device BEFORE paying the minting fee</strong> by 
+                  using the <strong>&quot;Generate a new spatter&quot;</strong> button in the simulation section on the landing page. 
+                  Generate at least 3-5 fresh spatters to ensure your browser can handle the computational load without crashing.
+                </p>
+              </div>
+
               <p className="font-semibold" style={{ color: '#000000' }}>
-                Make sure you have adequate hardware and time to review all 3 options before proceeding.
+                Make sure you have tested your hardware, have adequate time to review all 3 options, and are ready to proceed.
               </p>
             </div>
             <div className="flex gap-4">
