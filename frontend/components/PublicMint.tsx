@@ -44,9 +44,29 @@ export default function PublicMint() {
   // Confirmation modal for 45-minute warning
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
-  // Legal consent state - only stored in memory until mint completes
+  // Legal consent state - persisted to sessionStorage to survive page refreshes during minting
   const [showConsentModal, setShowConsentModal] = useState(false);
-  const [consentData, setConsentData] = useState<ConsentData | null>(null);
+  const [consentData, setConsentData] = useState<ConsentData | null>(() => {
+    // Initialize from sessionStorage if available (survives page refresh)
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('spatters_consent_data');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
+
+  // Persist consent data to sessionStorage whenever it changes
+  useEffect(() => {
+    if (consentData) {
+      sessionStorage.setItem('spatters_consent_data', JSON.stringify(consentData));
+    }
+  }, [consentData]);
   
   // Dynamic countdown timer for remaining mint time
   const [remainingMinutes, setRemainingMinutes] = useState<number>(45);
@@ -602,8 +622,17 @@ export default function PublicMint() {
           }),
         })
           .then(res => res.json())
-          .then(data => console.log('[PublicMint] Consent stored:', data))
+          .then(data => {
+            console.log('[PublicMint] Consent stored:', data);
+            // Clear sessionStorage after successful storage to database
+            sessionStorage.removeItem('spatters_consent_data');
+          })
           .catch(err => console.error('[PublicMint] Consent storage error:', err));
+      } else {
+        console.warn('[PublicMint] Cannot store consent - missing data:', {
+          hasConsentData: !!consentData,
+          hasCompleteHash: !!completeHash,
+        });
       }
       
       // Trigger pixel generation in background
