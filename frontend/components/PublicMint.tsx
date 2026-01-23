@@ -298,11 +298,13 @@ export default function PublicMint() {
   useEffect(() => {
     if (!pendingRequest || !address) return;
     
-    const request = pendingRequest as { seeds: string[]; timestamp: bigint; completed: boolean } | undefined;
-    const hasSeeds = request?.seeds?.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
+    const request = pendingRequest as { seeds: string[]; timestamp: bigint; completed: boolean };
+    if (!request.seeds) return;
+    
+    const hasSeeds = request.seeds.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
     
     // If seeds exist and not completed, auto-restore to preview mode
-    if (hasSeeds && !request?.completed && mintMode === 'choose') {
+    if (hasSeeds && !request.completed && mintMode === 'choose') {
       // Verify this request belongs to the current user
       const userIsRequester = activeMintRequester && 
         activeMintRequester.toLowerCase() === address.toLowerCase();
