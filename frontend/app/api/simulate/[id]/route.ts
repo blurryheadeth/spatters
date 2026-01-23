@@ -225,10 +225,12 @@ export async function GET(
       align-items: center;
     }
     /* p5.js creates a canvas element - scale it to fit viewport while maintaining aspect ratio */
+    /* Use width: 100% and height: auto to scale based on container width */
+    /* !important overrides p5.js inline styles */
     canvas {
+      width: 100% !important;
+      height: auto !important;
       max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
       display: block;
     }
     #sim-banner {

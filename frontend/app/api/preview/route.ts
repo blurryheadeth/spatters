@@ -131,10 +131,12 @@ export async function GET(request: Request) {
       align-items: center;
     }
     /* Scale canvas to fit viewport while maintaining aspect ratio */
+    /* Use width: 100% and height: auto to scale based on container width */
+    /* !important overrides p5.js inline styles */
     canvas {
+      width: 100% !important;
+      height: auto !important;
       max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
       display: block;
     }
   </style>
