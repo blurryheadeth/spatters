@@ -305,6 +305,29 @@ export default function OwnerMint() {
     }
   }, [pendingRequest, address, pendingPaletteResults]);
 
+  // Auto-restore preview mode when seeds exist (user refreshed during preview)
+  useEffect(() => {
+    if (!pendingRequest || !address || !isOwner) return;
+    
+    const request = pendingRequest as { seeds: string[]; timestamp: bigint; completed: boolean } | undefined;
+    const hasSeeds = request?.seeds?.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
+    
+    // If seeds exist and not completed, auto-restore to preview mode
+    if (hasSeeds && !request?.completed && mintMode === 'choose') {
+      // Verify this request belongs to the current user
+      const userIsRequester = activeMintRequester && 
+        activeMintRequester.toLowerCase() === address.toLowerCase();
+      
+      if (userIsRequester) {
+        setPreviewSeeds(request.seeds);
+        setMintMode('preview');
+        // Ensure all modals are closed
+        setShowCommitModal(false);
+        setShowConfirmModal(false);
+      }
+    }
+  }, [pendingRequest, address, isOwner, activeMintRequester, mintMode]);
+
   // Check for pending commit (step 1 complete, step 2 not started) and auto-open modal
   useEffect(() => {
     if (!pendingCommitData || !address || !isOwner) return;
@@ -326,6 +349,7 @@ export default function OwnerMint() {
       const request = pendingRequest as { seeds: string[]; timestamp: bigint } | undefined;
       const hasSeeds = request?.seeds?.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
       
+      // Don't show commit modal if seeds are already generated (preview mode)
       if (!hasSeeds) {
         // Check if commit hasn't expired
         const commitTime = Number(commitTimestamp);
@@ -373,16 +397,16 @@ export default function OwnerMint() {
     }
   }, [isCommitConfirmed]);
 
-  // Commit countdown timer
+  // Commit countdown timer - runs for both showCommitModal and showConfirmModal
   useEffect(() => {
-    if (!showCommitModal || commitCountdown <= 0) return;
+    if ((!showCommitModal && !showConfirmModal) || commitCountdown <= 0) return;
     
     const timer = setInterval(() => {
       setCommitCountdown(prev => Math.max(0, prev - 1));
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [showCommitModal, commitCountdown]);
+  }, [showCommitModal, showConfirmModal, commitCountdown]);
 
   // Handle request confirmation - extract seeds from pending request
   useEffect(() => {
