@@ -314,6 +314,7 @@ export default function Home() {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedPointsSubgroup, setSelectedPointsSubgroup] = useState<string | null>(null);
   const [isSimulationLoading, setIsSimulationLoading] = useState(true); // Start true for initial load
+  const [customBaseSeed, setCustomBaseSeed] = useState<string | null>(null); // For fresh spatter generation
 
   // Get mutation count for Spatter #1
   const { data: token1Mutations } = useReadContract({
@@ -351,6 +352,26 @@ export default function Home() {
   // Clear demo simulations
   const clearDemoSimulations = () => {
     setIsSimulationLoading(true);
+    setDemoSimulations([]);
+    setDemoIframeKey(prev => prev + 1);
+  };
+
+  // Generate a fresh random spatter
+  const handleGenerateNewSpatter = () => {
+    setIsSimulationLoading(true);
+    // Generate a random bytes32 seed from timestamp + random
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 0xFFFFFFFF);
+    const seedHex = '0x' + timestamp.toString(16).padStart(16, '0') + random.toString(16).padStart(8, '0') + '0'.repeat(40);
+    setCustomBaseSeed(seedHex);
+    setDemoSimulations([]);
+    setDemoIframeKey(prev => prev + 1);
+  };
+
+  // Reset to Token #1
+  const handleResetToToken1 = () => {
+    setIsSimulationLoading(true);
+    setCustomBaseSeed(null);
     setDemoSimulations([]);
     setDemoIframeKey(prev => prev + 1);
   };
@@ -654,9 +675,14 @@ export default function Home() {
               >
                 <iframe
                   key={demoIframeKey}
-                  src={demoSimulations.length > 0
-                    ? `${baseUrl}/api/simulate/1?simMutations=${encodeURIComponent(JSON.stringify(demoSimulations))}&v=${demoIframeKey}`
-                    : `${baseUrl}/api/token/1?c=${contractAddress?.slice(-8) || ''}&v=${demoIframeKey}`
+                  src={
+                    customBaseSeed
+                      ? (demoSimulations.length > 0
+                        ? `${baseUrl}/api/simulate/0?baseSeed=${customBaseSeed}&simMutations=${encodeURIComponent(JSON.stringify(demoSimulations))}&v=${demoIframeKey}`
+                        : `${baseUrl}/api/preview?seed=${customBaseSeed}&v=${demoIframeKey}`)
+                      : (demoSimulations.length > 0
+                        ? `${baseUrl}/api/simulate/1?simMutations=${encodeURIComponent(JSON.stringify(demoSimulations))}&v=${demoIframeKey}`
+                        : `${baseUrl}/api/token/1?c=${contractAddress?.slice(-8) || ''}&v=${demoIframeKey}`)
                   }
                   className="border-0 w-full"
                   scrolling="no"
@@ -664,11 +690,14 @@ export default function Home() {
                     height: `${demoIframeHeight}px`,
                     overflow: 'hidden',
                   }}
-                  title={`Spatter #1${demoSimulations.length > 0 ? ' (Simulation)' : ''}`}
+                  title={customBaseSeed ? 'Fresh Spatter (Simulation)' : `Spatter #1${demoSimulations.length > 0 ? ' (Simulation)' : ''}`}
                 />
               </div>
               <div className="text-center text-sm py-2 border-2 border-t-0" style={{ backgroundColor: COLORS.white, borderColor: COLORS.black, color: COLORS.black }}>
-                Click artwork to cycle through history • {demoSimulations.length > 0 ? `Real: ${token1MutationCount} + Simulated: ${demoSimulations.length}` : `Mutations: ${token1MutationCount}`}
+                {customBaseSeed 
+                  ? `Fresh Spatter • Click to cycle${demoSimulations.length > 0 ? ` • Simulated: ${demoSimulations.length}` : ''}`
+                  : `Spatter #1 • Click to cycle${demoSimulations.length > 0 ? ` • Real: ${token1MutationCount} + Simulated: ${demoSimulations.length}` : ` • Mutations: ${token1MutationCount}`}`
+                }
               </div>
             </div>
 
@@ -739,6 +768,20 @@ export default function Home() {
                   </div>
                 </div>
               )}
+
+              {/* Generate new spatter / Reset to Token #1 */}
+              <button
+                onClick={customBaseSeed ? handleResetToToken1 : handleGenerateNewSpatter}
+                disabled={isSimulationLoading}
+                className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: COLORS.green, 
+                  borderColor: COLORS.black,
+                  color: COLORS.white
+                }}
+              >
+                {customBaseSeed ? '↩️ Back to Spatter #1' : '🎲 Generate a new spatter'}
+              </button>
 
               <div className="border-2 p-4" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
                 <p className="text-sm font-medium" style={{ color: COLORS.white }}>

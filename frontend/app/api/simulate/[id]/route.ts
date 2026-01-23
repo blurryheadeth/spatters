@@ -74,13 +74,11 @@ export async function GET(
   const { id } = await params;
   const tokenId = parseInt(id, 10);
 
-  if (isNaN(tokenId) || tokenId < 1) {
-    return new NextResponse('Invalid token ID', { status: 400 });
-  }
-
-  // Parse simulated mutations from query params
+  // Parse query params
   const { searchParams } = new URL(request.url);
   const simMutationsParam = searchParams.get('simMutations');
+  const baseSeedParam = searchParams.get('baseSeed'); // Optional: for fresh spatter generation
+  
   let simulatedMutations: Array<[number, string]> = [];
   
   if (simMutationsParam) {
@@ -91,39 +89,79 @@ export async function GET(
     }
   }
 
-  try {
-    // Verify token exists
-    await publicClient.readContract({
-      address: CONTRACT_ADDRESS as `0x${string}`,
-      abi: SPATTERS_ABI,
-      functionName: 'ownerOf',
-      args: [BigInt(tokenId)],
-    });
-  } catch (error: any) {
-    if (error.message?.includes('ERC721NonexistentToken')) {
-      return new NextResponse('Token does not exist', { status: 404 });
+  // Validate baseSeed if provided (must be bytes32 hex)
+  if (baseSeedParam && !/^0x[0-9A-Fa-f]{64}$/.test(baseSeedParam)) {
+    return new NextResponse('Invalid baseSeed. Must be bytes32 hex (0x + 64 hex chars)', { status: 400 });
+  }
+
+  // If no baseSeed provided, require valid token ID
+  if (!baseSeedParam) {
+    if (isNaN(tokenId) || tokenId < 1) {
+      return new NextResponse('Invalid token ID', { status: 400 });
     }
-    console.error('Error verifying token:', error);
+
+    try {
+      // Verify token exists
+      await publicClient.readContract({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: SPATTERS_ABI,
+        functionName: 'ownerOf',
+        args: [BigInt(tokenId)],
+      });
+    } catch (error: any) {
+      if (error.message?.includes('ERC721NonexistentToken')) {
+        return new NextResponse('Token does not exist', { status: 404 });
+      }
+      console.error('Error verifying token:', error);
+    }
+  }
+
+  // Convert bytes32 hex seed to truncated decimal (matching on-chain template)
+  function hexToSeed(hexString: string): number {
+    const truncated = hexString.slice(2, 15);
+    return parseInt(truncated, 16);
   }
 
   // Fetch on-chain data
   let storageAddresses: readonly `0x${string}`[];
-  let tokenData: readonly [string, readonly string[], readonly string[], readonly [string, string, string, string, string, string]];
+  let mintSeedDecimal: number;
+  let realMutations: Array<[number, string]> = [];
+  let paletteArray: string[] = [];
 
   try {
-    [storageAddresses, tokenData] = await Promise.all([
-      publicClient.readContract({
-        address: GENERATOR_ADDRESS as `0x${string}`,
-        abi: GENERATOR_ABI,
-        functionName: 'getStorageAddresses',
-      }),
-      publicClient.readContract({
+    // Always need storage addresses for spatters.js
+    storageAddresses = await publicClient.readContract({
+      address: GENERATOR_ADDRESS as `0x${string}`,
+      abi: GENERATOR_ABI,
+      functionName: 'getStorageAddresses',
+    });
+
+    if (baseSeedParam) {
+      // Fresh spatter mode: use provided seed, no real mutations or palette
+      mintSeedDecimal = hexToSeed(baseSeedParam);
+    } else {
+      // Token mode: fetch token data from blockchain
+      const tokenData = await publicClient.readContract({
         address: GENERATOR_ADDRESS as `0x${string}`,
         abi: GENERATOR_ABI,
         functionName: 'getTokenData',
         args: [BigInt(tokenId)],
-      }),
-    ]);
+      });
+
+      const [seed, mutationSeeds, mutationTypes, customPalette] = tokenData;
+      mintSeedDecimal = hexToSeed(seed);
+
+      // Format real mutations from blockchain
+      realMutations = mutationSeeds.map((mSeed: string, i: number) => [
+        hexToSeed(mSeed),
+        mutationTypes[i]
+      ]);
+
+      // Check if custom palette is set
+      if (customPalette[0] !== '') {
+        paletteArray = [...customPalette];
+      }
+    }
   } catch (error: any) {
     console.error('Error fetching on-chain data:', error);
     return new NextResponse('Failed to fetch on-chain data: ' + error.message, { status: 500 });
@@ -148,29 +186,11 @@ export async function GET(
     return new NextResponse('Failed to read spatters.js: ' + error.message, { status: 500 });
   }
 
-  const [seed, mutationSeeds, mutationTypes, customPalette] = tokenData;
-
-  // Convert bytes32 hex seed to truncated decimal (matching on-chain template)
-  function hexToSeed(hexString: string): number {
-    const truncated = hexString.slice(2, 15);
-    return parseInt(truncated, 16);
-  }
-
-  // Convert mint seed to decimal
-  const mintSeedDecimal = hexToSeed(seed);
-
-  // Format real mutations from blockchain
-  const realMutations = mutationSeeds.map((mSeed: string, i: number) => [
-    hexToSeed(mSeed),
-    mutationTypes[i]
-  ]);
-
   // Combine real + simulated mutations
   const allMutations = [...realMutations, ...simulatedMutations];
 
   // Check if custom palette is set
-  const hasCustomPalette = customPalette[0] !== '';
-  const paletteArray = hasCustomPalette ? [...customPalette] : [];
+  const hasCustomPalette = paletteArray.length > 0;
 
   // Art Blocks config for p5.js loading
   const artBlocksRegistry = '0x37861f95882ACDba2cCD84F5bFc4598e2ECDDdAF';
@@ -180,6 +200,7 @@ export async function GET(
   // Simulation info for display
   const simCount = simulatedMutations.length;
   const realCount = realMutations.length;
+  const isFreshSpatter = !!baseSeedParam;
 
   // Build the simulation HTML with responsive CSS matching /api/token/[id]
   const simulationHtml = `<!DOCTYPE html>
@@ -187,7 +208,7 @@ export async function GET(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Spatter #${tokenId} - Simulation</title>
+  <title>${isFreshSpatter ? 'Fresh Spatter' : `Spatter #${tokenId}`} - Simulation</title>
   <style>
     * { box-sizing: border-box; }
     html, body {
