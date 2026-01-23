@@ -357,9 +357,9 @@ export default function OwnerMint() {
         const now = Math.floor(Date.now() / 1000);
         
         if (now < expirationTime) {
-          // Close any other modals and open the confirmation modal
-          setShowCommitModal(false);
-          setShowConfirmModal(true);
+          // Close any other modals and open the commit countdown modal
+          setShowConfirmModal(false);
+          setShowCommitModal(true);
           
           // Calculate how much time has passed since commit
           const elapsed = now - commitTime;
