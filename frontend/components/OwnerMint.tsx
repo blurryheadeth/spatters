@@ -266,7 +266,11 @@ export default function OwnerMint() {
 
   // Check for existing pending request on page load and auto-resume
   useEffect(() => {
-    if (pendingRequest && address) {
+    if (pendingRequest && address && activeMintRequester) {
+      // Only auto-resume if the current user is the one who made the request
+      const userIsRequester = activeMintRequester.toLowerCase() === address.toLowerCase();
+      if (!userIsRequester) return;
+      
       const request = pendingRequest as { seeds: string[]; timestamp: bigint; completed: boolean; hasCustomPalette: boolean };
       // If user has an uncompleted pending request with seeds
       if (request.seeds && request.seeds.length === 3 && !request.completed && request.timestamp > BigInt(0)) {
@@ -303,7 +307,7 @@ export default function OwnerMint() {
         }
       }
     }
-  }, [pendingRequest, address, pendingPaletteResults]);
+  }, [pendingRequest, address, activeMintRequester, pendingPaletteResults]);
 
   // Auto-restore preview mode when seeds exist (user refreshed during preview)
   useEffect(() => {

@@ -257,7 +257,15 @@ export default function PublicMint() {
 
   // Check for existing pending request on page load and auto-resume
   useEffect(() => {
-    if (pendingRequest && address) {
+    if (pendingRequest && address && activeMintRequester) {
+      // Only auto-resume if the current user is the one who made the request
+      const userIsRequester = activeMintRequester.toLowerCase() === address.toLowerCase();
+      if (!userIsRequester) {
+        setHasPendingToView(false);
+        setPendingSeedsCache([]);
+        return;
+      }
+      
       const request = pendingRequest as { seeds: string[]; timestamp: bigint; completed: boolean };
       // If user has an uncompleted pending request with seeds
       if (request.seeds && request.seeds.length === 3 && !request.completed && request.timestamp > BigInt(0)) {
@@ -292,7 +300,7 @@ export default function PublicMint() {
         setPendingSeedsCache([]);
       }
     }
-  }, [pendingRequest, address]);
+  }, [pendingRequest, address, activeMintRequester]);
 
   // Auto-restore preview mode when seeds exist (user refreshed during preview)
   useEffect(() => {
