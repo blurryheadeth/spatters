@@ -397,7 +397,7 @@ export default function Home() {
               <div className="text-sm font-medium" style={{ color: COLORS.black }}>Max Supply</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-black" style={{ color: COLORS.blue }}>0.007 ETH</div>
+              <div className="text-4xl font-black" style={{ color: COLORS.blue }}>0.0066 ETH</div>
               <div className="text-sm font-medium" style={{ color: COLORS.black }}>Starting Price</div>
             </div>
             <div className="text-center">
