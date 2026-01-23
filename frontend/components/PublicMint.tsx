@@ -303,21 +303,20 @@ export default function PublicMint() {
     
     const hasSeeds = request.seeds.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
     
-    // If seeds exist and not completed, auto-restore to preview mode
-    if (hasSeeds && !request.completed && mintMode === 'choose') {
+    // If seeds exist and not completed, auto-restore to preview mode (only if not already showing)
+    if (hasSeeds && !request.completed && previewSeeds.length === 0) {
       // Verify this request belongs to the current user
       const userIsRequester = activeMintRequester && 
         activeMintRequester.toLowerCase() === address.toLowerCase();
       
       if (userIsRequester) {
         setPreviewSeeds(request.seeds);
-        setMintMode('preview');
         // Ensure all modals are closed
         setShowCommitModal(false);
         setShowConfirmModal(false);
       }
     }
-  }, [pendingRequest, address, activeMintRequester, mintMode]);
+  }, [pendingRequest, address, activeMintRequester, previewSeeds.length]);
 
   // Check for pending commit (step 1 complete, step 2 not started) and auto-open modal
   useEffect(() => {
