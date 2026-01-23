@@ -63,8 +63,8 @@ HARDWARE AND TECHNICAL REQUIREMENTS:
 - I accept full responsibility for ensuring my hardware can handle the generation process.
 
 HARDWARE TESTING CONFIRMATION:
-- I confirm that I have EXTENSIVELY TESTED spatter generation on this device.
-- I have used the "Generate a new spatter" feature on the landing page multiple times.
+- I confirm that I have EXTENSIVELY TESTED spatter generation on this device (at least 15 times).
+- I have used the "Generate a new spatter" feature on the landing page at least 15 times.
 - I have NOT experienced any browser crashes, freezes, or performance issues during testing.
 - I understand that if I have not adequately tested my hardware, I should NOT proceed with minting.
 - I accept that proceeding without proper testing may result in loss of my minting fee.

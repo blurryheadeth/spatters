@@ -1158,7 +1158,7 @@ export default function PublicMint() {
                 <p className="text-sm" style={{ color: '#000000' }}>
                   If you haven&apos;t already, <strong>please test your device BEFORE paying the minting fee</strong> by 
                   using the <strong>&quot;Generate a new spatter&quot;</strong> button in the simulation section on the landing page. 
-                  Generate at least 3-5 fresh spatters to ensure your browser can handle the computational load without crashing.
+                  Generate at least 15 fresh spatters to ensure your browser can handle the computational load without crashing.
                 </p>
               </div>
 
