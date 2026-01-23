@@ -21,7 +21,7 @@ const COLORS = {
   white: '#FFFFFF',
 };
 
-// Mutation groups for the simulation interface
+// Mutation groups for the simulation interface (excluding points which has subgroups)
 const MUTATION_GROUPS: Record<string, { label: string; emoji: string; mutations: string[] }> = {
   general: {
     label: 'General',
@@ -66,16 +66,59 @@ const MUTATION_GROUPS: Record<string, { label: string; emoji: string; mutations:
       'lineMoveLeft', 'lineMoveRight', 'lineMoveUp', 'lineMoveDown',
     ],
   },
-  points: {
-    label: 'Points',
-    emoji: '📍',
+};
+
+// Points sub-categories (shown when "Points" is selected)
+const POINTS_SUBGROUPS: Record<string, { label: string; emoji: string; mutations: string[] }> = {
+  any: {
+    label: 'Any',
+    emoji: '🎯',
     mutations: [
       'seedpointMoveRight', 'seedpointMoveLeft', 'seedpointMoveUp', 'seedpointMoveDown',
       'seedpointChangeCurveCenter', 'seedpointIncreaseConcavity', 'seedpointDecreaseConcavity',
       'seedpointIncreaseRadius', 'seedpointDecreaseRadius',
     ],
   },
+  top: {
+    label: 'Top',
+    emoji: '⬆️',
+    mutations: [
+      'seedpointMoveRight-top', 'seedpointMoveLeft-top', 'seedpointMoveUp-top', 'seedpointMoveDown-top',
+      'seedpointChangeCurveCenter-top', 'seedpointIncreaseConcavity-top', 'seedpointDecreaseConcavity-top',
+      'seedpointIncreaseRadius-top', 'seedpointDecreaseRadius-top',
+    ],
+  },
+  bottom: {
+    label: 'Bottom',
+    emoji: '⬇️',
+    mutations: [
+      'seedpointMoveRight-bottom', 'seedpointMoveLeft-bottom', 'seedpointMoveUp-bottom', 'seedpointMoveDown-bottom',
+      'seedpointChangeCurveCenter-bottom', 'seedpointIncreaseConcavity-bottom', 'seedpointDecreaseConcavity-bottom',
+      'seedpointIncreaseRadius-bottom', 'seedpointDecreaseRadius-bottom',
+    ],
+  },
+  left: {
+    label: 'Left',
+    emoji: '⬅️',
+    mutations: [
+      'seedpointMoveRight-left', 'seedpointMoveLeft-left', 'seedpointMoveUp-left', 'seedpointMoveDown-left',
+      'seedpointChangeCurveCenter-left', 'seedpointIncreaseConcavity-left', 'seedpointDecreaseConcavity-left',
+      'seedpointIncreaseRadius-left', 'seedpointDecreaseRadius-left',
+    ],
+  },
+  right: {
+    label: 'Right',
+    emoji: '➡️',
+    mutations: [
+      'seedpointMoveRight-right', 'seedpointMoveLeft-right', 'seedpointMoveUp-right', 'seedpointMoveDown-right',
+      'seedpointChangeCurveCenter-right', 'seedpointIncreaseConcavity-right', 'seedpointDecreaseConcavity-right',
+      'seedpointIncreaseRadius-right', 'seedpointDecreaseRadius-right',
+    ],
+  },
 };
+
+// Total count for points mutations
+const POINTS_TOTAL_COUNT = Object.values(POINTS_SUBGROUPS).reduce((sum, g) => sum + g.mutations.length, 0);
 
 // Human-readable labels for mutations
 const MUTATION_LABELS: Record<string, string> = {
@@ -137,6 +180,46 @@ const MUTATION_LABELS: Record<string, string> = {
   seedpointDecreaseConcavity: 'Decrease curve depth',
   seedpointIncreaseRadius: 'Increase point radius',
   seedpointDecreaseRadius: 'Decrease point radius',
+  // Top points
+  'seedpointMoveRight-top': 'Move top point right',
+  'seedpointMoveLeft-top': 'Move top point left',
+  'seedpointMoveUp-top': 'Move top point up',
+  'seedpointMoveDown-top': 'Move top point down',
+  'seedpointChangeCurveCenter-top': 'Change top curve center',
+  'seedpointIncreaseConcavity-top': 'Increase top curve depth',
+  'seedpointDecreaseConcavity-top': 'Decrease top curve depth',
+  'seedpointIncreaseRadius-top': 'Increase top point radius',
+  'seedpointDecreaseRadius-top': 'Decrease top point radius',
+  // Bottom points
+  'seedpointMoveRight-bottom': 'Move bottom point right',
+  'seedpointMoveLeft-bottom': 'Move bottom point left',
+  'seedpointMoveUp-bottom': 'Move bottom point up',
+  'seedpointMoveDown-bottom': 'Move bottom point down',
+  'seedpointChangeCurveCenter-bottom': 'Change bottom curve center',
+  'seedpointIncreaseConcavity-bottom': 'Increase bottom curve depth',
+  'seedpointDecreaseConcavity-bottom': 'Decrease bottom curve depth',
+  'seedpointIncreaseRadius-bottom': 'Increase bottom point radius',
+  'seedpointDecreaseRadius-bottom': 'Decrease bottom point radius',
+  // Left points
+  'seedpointMoveRight-left': 'Move left point right',
+  'seedpointMoveLeft-left': 'Move left point left',
+  'seedpointMoveUp-left': 'Move left point up',
+  'seedpointMoveDown-left': 'Move left point down',
+  'seedpointChangeCurveCenter-left': 'Change left curve center',
+  'seedpointIncreaseConcavity-left': 'Increase left curve depth',
+  'seedpointDecreaseConcavity-left': 'Decrease left curve depth',
+  'seedpointIncreaseRadius-left': 'Increase left point radius',
+  'seedpointDecreaseRadius-left': 'Decrease left point radius',
+  // Right points
+  'seedpointMoveRight-right': 'Move right point right',
+  'seedpointMoveLeft-right': 'Move right point left',
+  'seedpointMoveUp-right': 'Move right point up',
+  'seedpointMoveDown-right': 'Move right point down',
+  'seedpointChangeCurveCenter-right': 'Change right curve center',
+  'seedpointIncreaseConcavity-right': 'Increase right curve depth',
+  'seedpointDecreaseConcavity-right': 'Decrease right curve depth',
+  'seedpointIncreaseRadius-right': 'Increase right point radius',
+  'seedpointDecreaseRadius-right': 'Decrease right point radius',
 };
 
 // Styled "Spatters" title with each letter colored
@@ -229,6 +312,7 @@ export default function Home() {
   const [demoIframeHeight, setDemoIframeHeight] = useState(600);
   const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedPointsSubgroup, setSelectedPointsSubgroup] = useState<string | null>(null);
   const [isSimulationLoading, setIsSimulationLoading] = useState(true); // Start true for initial load
 
   // Get mutation count for Spatter #1
@@ -261,6 +345,7 @@ export default function Home() {
     setDemoIframeKey(prev => prev + 1);
     setIsSimulationModalOpen(false);
     setSelectedGroup(null);
+    setSelectedPointsSubgroup(null);
   };
 
   // Clear demo simulations
@@ -678,7 +763,25 @@ export default function Home() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b-2" style={{ borderColor: COLORS.black }}>
               <h3 className="text-lg font-bold" style={{ color: COLORS.black }}>
-                {selectedGroup ? (
+                {selectedGroup === 'points' && selectedPointsSubgroup ? (
+                  <button 
+                    onClick={() => setSelectedPointsSubgroup(null)}
+                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                    style={{ color: COLORS.black }}
+                  >
+                    <span>←</span>
+                    <span>{POINTS_SUBGROUPS[selectedPointsSubgroup]?.emoji} {POINTS_SUBGROUPS[selectedPointsSubgroup]?.label} Points</span>
+                  </button>
+                ) : selectedGroup === 'points' ? (
+                  <button 
+                    onClick={() => setSelectedGroup(null)}
+                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                    style={{ color: COLORS.black }}
+                  >
+                    <span>←</span>
+                    <span>📍 Points</span>
+                  </button>
+                ) : selectedGroup ? (
                   <button 
                     onClick={() => setSelectedGroup(null)}
                     className="flex items-center gap-2 hover:opacity-70 transition-opacity"
@@ -692,7 +795,7 @@ export default function Home() {
                 )}
               </h3>
               <button
-                onClick={() => { setIsSimulationModalOpen(false); setSelectedGroup(null); }}
+                onClick={() => { setIsSimulationModalOpen(false); setSelectedGroup(null); setSelectedPointsSubgroup(null); }}
                 className="text-2xl font-bold w-8 h-8 flex items-center justify-center hover:opacity-70 transition-opacity"
                 style={{ color: COLORS.black }}
               >
@@ -703,6 +806,7 @@ export default function Home() {
             {/* Modal Body */}
             <div className="p-4 overflow-y-auto max-h-[calc(85vh-80px)]" style={{ backgroundColor: COLORS.background }}>
               {!selectedGroup ? (
+                /* Category Selection */
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {Object.entries(MUTATION_GROUPS).map(([key, group]) => (
                     <button
@@ -716,8 +820,53 @@ export default function Home() {
                       <span className="text-xs" style={{ color: COLORS.black, opacity: 0.7 }}>{group.mutations.length} options</span>
                     </button>
                   ))}
+                  {/* Points - special category with sub-menu */}
+                  <button
+                    onClick={() => setSelectedGroup('points')}
+                    className="flex flex-col items-center justify-center p-4 border-2 transition-opacity hover:opacity-80"
+                    style={{ backgroundColor: COLORS.white, borderColor: COLORS.black }}
+                  >
+                    <span className="text-2xl mb-1">📍</span>
+                    <span className="text-sm font-medium" style={{ color: COLORS.black }}>Points</span>
+                    <span className="text-xs" style={{ color: COLORS.black, opacity: 0.7 }}>{POINTS_TOTAL_COUNT} options</span>
+                  </button>
+                </div>
+              ) : selectedGroup === 'points' && !selectedPointsSubgroup ? (
+                /* Points Sub-Group Selection */
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {Object.entries(POINTS_SUBGROUPS).map(([key, subgroup]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedPointsSubgroup(key)}
+                      className="flex flex-col items-center justify-center p-4 border-2 transition-opacity hover:opacity-80"
+                      style={{ backgroundColor: COLORS.white, borderColor: COLORS.black }}
+                    >
+                      <span className="text-2xl mb-1">{subgroup.emoji}</span>
+                      <span className="text-sm font-medium" style={{ color: COLORS.black }}>{subgroup.label}</span>
+                      <span className="text-xs" style={{ color: COLORS.black, opacity: 0.7 }}>{subgroup.mutations.length} options</span>
+                    </button>
+                  ))}
+                </div>
+              ) : selectedGroup === 'points' && selectedPointsSubgroup ? (
+                /* Points Mutation Selection */
+                <div className="space-y-2">
+                  {POINTS_SUBGROUPS[selectedPointsSubgroup]?.mutations.map((mutation) => (
+                    <button
+                      key={mutation}
+                      onClick={() => handleDemoSimulate(mutation)}
+                      className="w-full text-left px-4 py-3 border-2 transition-opacity hover:opacity-80"
+                      style={{ 
+                        backgroundColor: COLORS.blue, 
+                        borderColor: COLORS.black,
+                        color: COLORS.white
+                      }}
+                    >
+                      <span className="font-medium">{MUTATION_LABELS[mutation] || mutation}</span>
+                    </button>
+                  ))}
                 </div>
               ) : (
+                /* Regular Group Mutation Selection */
                 <div className="space-y-2">
                   {MUTATION_GROUPS[selectedGroup]?.mutations.map((mutation) => (
                     <button
