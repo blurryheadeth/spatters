@@ -62,6 +62,13 @@ HARDWARE AND TECHNICAL REQUIREMENTS:
 - If my device crashes or fails during minting, my minting fee will NOT be refunded.
 - I accept full responsibility for ensuring my hardware can handle the generation process.
 
+HARDWARE TESTING CONFIRMATION:
+- I confirm that I have EXTENSIVELY TESTED spatter generation on this device.
+- I have used the "Generate a new spatter" feature on the landing page multiple times.
+- I have NOT experienced any browser crashes, freezes, or performance issues during testing.
+- I understand that if I have not adequately tested my hardware, I should NOT proceed with minting.
+- I accept that proceeding without proper testing may result in loss of my minting fee.
+
 ELIGIBILITY:
 - I am at least 18 years old or the legal age of majority in my jurisdiction.
 - I am NOT located in a sanctioned or restricted jurisdiction.
@@ -105,6 +112,9 @@ export function verifyConsentMessage(message: string, walletAddress: string): bo
     'NOT been audited',
     'desktop or laptop computer',
     'Mobile devices, tablets, and older/weaker hardware may CRASH',
+    'EXTENSIVELY TESTED spatter generation',
+    'Generate a new spatter',
+    'NOT experienced any browser crashes',
     'at least 18 years old',
     'I HAVE READ ALL REFERENCED DOCUMENTS',
   ];

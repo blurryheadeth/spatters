@@ -29,13 +29,14 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
   const [acknowledgesNoRefund, setAcknowledgesNoRefund] = useState(false);
   const [acknowledgesNotInvestment, setAcknowledgesNotInvestment] = useState(false);
   const [acknowledgesHardwareRequirements, setAcknowledgesHardwareRequirements] = useState(false);
+  const [confirmsHardwareTested, setConfirmsHardwareTested] = useState(false);
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { signMessageAsync } = useSignMessage();
 
-  const allChecked = hasReadTerms && hasReadPrivacy && hasReadRisks && acknowledgesNoRefund && acknowledgesNotInvestment && acknowledgesHardwareRequirements && isAgeConfirmed;
+  const allChecked = hasReadTerms && hasReadPrivacy && hasReadRisks && acknowledgesNoRefund && acknowledgesNotInvestment && acknowledgesHardwareRequirements && confirmsHardwareTested && isAgeConfirmed;
 
   const handleSign = async () => {
     if (!allChecked) return;
@@ -193,6 +194,21 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
                 I understand that <strong style={{ color: COLORS.red }}>minting MUST be done from a desktop or laptop computer</strong> with 
                 a modern browser and adequate hardware. <strong style={{ color: COLORS.red }}>Mobile devices, tablets, and older/weaker hardware 
                 may crash or fail</strong> during the generation process, resulting in loss of my minting fee
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={confirmsHardwareTested}
+                onChange={(e) => setConfirmsHardwareTested(e.target.checked)}
+                className="mt-1 w-5 h-5 flex-shrink-0"
+                style={{ accentColor: COLORS.red }}
+              />
+              <span className="text-sm" style={{ color: COLORS.black }}>
+                I confirm that I have <strong style={{ color: COLORS.red }}>extensively tested spatter generation on this device</strong> using 
+                the "Generate a new spatter" feature on the landing page, and have <strong style={{ color: COLORS.red }}>NOT experienced any 
+                browser crashes or performance issues</strong>. I understand that if I have not tested my hardware, I should NOT proceed with minting
               </span>
             </label>
           </div>
