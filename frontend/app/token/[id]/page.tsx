@@ -335,6 +335,15 @@ export default function TokenPage() {
               >
                 Etherscan →
               </a>
+              <a
+                href={`https://opensea.io/item/ethereum/${contractAddress}/${tokenId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-70 font-medium"
+                style={{ color: COLORS.blue }}
+              >
+                OpenSea →
+              </a>
             </div>
 
             {/* Mutation count */}
