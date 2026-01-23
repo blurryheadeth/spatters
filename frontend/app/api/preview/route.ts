@@ -117,19 +117,24 @@ export async function GET(request: Request) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Spatter Preview</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { 
       width: 100%; 
-      min-height: 100%; 
-      background: #000;
+      height: 100%; 
+      overflow: hidden;
+      background: #EBE5D9;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
     }
+    /* Scale canvas to fit viewport while maintaining aspect ratio */
     canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
       display: block;
     }
   </style>
