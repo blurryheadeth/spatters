@@ -28,13 +28,14 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
   const [hasReadRisks, setHasReadRisks] = useState(false);
   const [acknowledgesNoRefund, setAcknowledgesNoRefund] = useState(false);
   const [acknowledgesNotInvestment, setAcknowledgesNotInvestment] = useState(false);
+  const [acknowledgesHardwareRequirements, setAcknowledgesHardwareRequirements] = useState(false);
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { signMessageAsync } = useSignMessage();
 
-  const allChecked = hasReadTerms && hasReadPrivacy && hasReadRisks && acknowledgesNoRefund && acknowledgesNotInvestment && isAgeConfirmed;
+  const allChecked = hasReadTerms && hasReadPrivacy && hasReadRisks && acknowledgesNoRefund && acknowledgesNotInvestment && acknowledgesHardwareRequirements && isAgeConfirmed;
 
   const handleSign = async () => {
     if (!allChecked) return;
@@ -177,6 +178,21 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
                 I am <strong style={{ color: COLORS.red }}>NOT</strong> paying this minting fee for investment purposes. 
                 I understand the NFT I receive may have <strong style={{ color: COLORS.red }}>ZERO monetary value</strong> and 
                 I do <strong style={{ color: COLORS.red }}>NOT</strong> expect any resale value or financial return
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acknowledgesHardwareRequirements}
+                onChange={(e) => setAcknowledgesHardwareRequirements(e.target.checked)}
+                className="mt-1 w-5 h-5 flex-shrink-0"
+                style={{ accentColor: COLORS.red }}
+              />
+              <span className="text-sm" style={{ color: COLORS.black }}>
+                I understand that <strong style={{ color: COLORS.red }}>minting MUST be done from a desktop or laptop computer</strong> with 
+                a modern browser and adequate hardware. <strong style={{ color: COLORS.red }}>Mobile devices, tablets, and older/weaker hardware 
+                may crash or fail</strong> during the generation process, resulting in loss of my minting fee
               </span>
             </label>
           </div>

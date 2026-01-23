@@ -55,6 +55,13 @@ ARTIST MINTING RIGHTS:
 - The artist may mint and sell tokens without paying the minting fee.
 - This may affect secondary market value and I accept this risk.
 
+HARDWARE AND TECHNICAL REQUIREMENTS:
+- I understand that minting MUST be performed from a desktop or laptop computer.
+- Mobile devices, tablets, and older/weaker hardware may CRASH or FAIL during generation.
+- The artwork generation process is computationally intensive and may take 1-2 minutes.
+- If my device crashes or fails during minting, my minting fee will NOT be refunded.
+- I accept full responsibility for ensuring my hardware can handle the generation process.
+
 ELIGIBILITY:
 - I am at least 18 years old or the legal age of majority in my jurisdiction.
 - I am NOT located in a sanctioned or restricted jurisdiction.
@@ -96,6 +103,8 @@ export function verifyConsentMessage(message: string, walletAddress: string): bo
     'NOT expect the NFT to have any resale value',
     'ZERO monetary value',
     'NOT been audited',
+    'desktop or laptop computer',
+    'Mobile devices, tablets, and older/weaker hardware may CRASH',
     'at least 18 years old',
     'I HAVE READ ALL REFERENCED DOCUMENTS',
   ];

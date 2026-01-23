@@ -1445,8 +1445,20 @@ export default function OwnerMint() {
                     <strong>Your minting slot is NOT refundable</strong> if you fail to complete the selection in time.
                   </li>
                 </ul>
+                
+                <div className="border-2 p-4" style={{ backgroundColor: '#fc1a4a', borderColor: '#000000' }}>
+                  <p className="text-sm font-bold mb-2" style={{ color: '#FFFFFF' }}>
+                    🖥️ CRITICAL: Desktop/Laptop Required
+                  </p>
+                  <p className="text-sm" style={{ color: '#FFFFFF' }}>
+                    <strong>DO NOT continue if you are on a mobile device or tablet.</strong> The generation process 
+                    requires significant computing power and takes 1-2 minutes per preview. Mobile devices and weak 
+                    hardware WILL crash, resulting in loss of your minting slot with NO recovery option.
+                  </p>
+                </div>
+
                 <p className="font-semibold" style={{ color: '#000000' }}>
-                  Make sure you have time to review and select an option before proceeding.
+                  Make sure you have adequate hardware and time to review all 3 options before proceeding.
                 </p>
               </div>
               <div className="flex gap-4">

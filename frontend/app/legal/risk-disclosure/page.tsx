@@ -79,7 +79,49 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">4. Smart Contract Risks</h2>
+        <h2 className="text-2xl font-bold mb-4">4. Hardware and Technical Requirements</h2>
+        <p className="font-bold text-red-600">
+          MINTING MUST BE PERFORMED FROM A DESKTOP OR LAPTOP COMPUTER WITH ADEQUATE HARDWARE.
+        </p>
+        <p className="mt-4">
+          <strong>The Spatters artwork generation process is computationally intensive.</strong> Generating a 
+          single Spatter NFT requires significant browser processing power and can take 1-2 minutes per preview. 
+          Using inadequate hardware can result in browser crashes and loss of your minting fee.
+        </p>
+        <div className="mt-4 p-4 border-2 border-red-500 bg-red-50">
+          <p className="font-bold text-red-700 mb-2">CRITICAL: Mobile Devices Are NOT Supported</p>
+          <p className="text-red-700">
+            <strong>DO NOT attempt to mint from a mobile phone or tablet.</strong> Mobile browsers and hardware 
+            are not powerful enough to handle the generation process and WILL crash or fail. If your device 
+            crashes during minting, <strong>your minting fee will NOT be refunded</strong> under any circumstances.
+          </p>
+        </div>
+        <ul className="list-disc list-inside mt-4 space-y-2">
+          <li>
+            <strong>Required:</strong> Desktop or laptop computer with a modern processor (Intel Core i5/AMD Ryzen 5 or better recommended)
+          </li>
+          <li>
+            <strong>Required:</strong> Modern web browser (Chrome, Firefox, Edge, or Safari - latest versions)
+          </li>
+          <li>
+            <strong>Not Supported:</strong> Mobile phones, tablets, Chromebooks, or computers older than 5 years
+          </li>
+          <li>
+            <strong>Expected Duration:</strong> Each preview generation takes 1-2 minutes; you will generate 3 previews
+          </li>
+          <li>
+            <strong>Risk:</strong> If your browser crashes or freezes during generation, you may lose your entire minting fee
+          </li>
+        </ul>
+        <p className="mt-4 font-semibold">
+          By proceeding with minting, you confirm that you are using adequate hardware and accept full 
+          responsibility for any technical failures. The artist and project are not liable for losses resulting 
+          from inadequate hardware or browser crashes.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">5. Smart Contract Risks</h2>
         <p className="font-bold text-red-600">
           THE SPATTERS SMART CONTRACT HAS NOT BEEN AUDITED.
         </p>
@@ -109,7 +151,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">5. Blockchain and Network Risks</h2>
+        <h2 className="text-2xl font-bold mb-4">6. Blockchain and Network Risks</h2>
         <p>
           Using Ethereum and interacting with smart contracts carries inherent risks:
         </p>
@@ -133,7 +175,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">6. Wallet Security</h2>
+        <h2 className="text-2xl font-bold mb-4">7. Wallet Security</h2>
         <p>
           Your cryptocurrency wallet and its contents are your sole responsibility. You must:
         </p>
@@ -160,7 +202,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">7. No Refunds</h2>
+        <h2 className="text-2xl font-bold mb-4">8. No Refunds</h2>
         <p>
           <strong>All minting fees are non-refundable.</strong> This applies regardless of:
         </p>
@@ -177,7 +219,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">8. Royalties</h2>
+        <h2 className="text-2xl font-bold mb-4">9. Royalties</h2>
         <p>
           Spatters implements a 5% royalty via the EIP-2981 standard. However:
         </p>
@@ -198,7 +240,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">9. Regulatory Uncertainty</h2>
+        <h2 className="text-2xl font-bold mb-4">10. Regulatory Uncertainty</h2>
         <p>
           The regulatory environment for NFTs and cryptocurrency is evolving and uncertain:
         </p>
@@ -219,7 +261,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">10. Artist Minting Rights</h2>
+        <h2 className="text-2xl font-bold mb-4">11. Artist Minting Rights</h2>
         <p>
           The artist (creator of Spatters) has the ability to mint new Spatters NFTs within the 999 token limit 
           at any time <strong>without paying the minting fee</strong> that would be required of regular users. 
@@ -239,7 +281,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">11. No Guarantees About the Project</h2>
+        <h2 className="text-2xl font-bold mb-4">12. No Guarantees About the Project</h2>
         <p>
           We make no guarantees about:
         </p>
@@ -257,7 +299,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">12. Assumption of Risk</h2>
+        <h2 className="text-2xl font-bold mb-4">13. Assumption of Risk</h2>
         <p>
           By minting, purchasing, holding, or interacting with Spatters NFTs, you expressly acknowledge that:
         </p>
@@ -271,7 +313,7 @@ export default function RiskDisclosure() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">13. Contact</h2>
+        <h2 className="text-2xl font-bold mb-4">14. Contact</h2>
         <p>
           For questions about these risks, please contact:{' '}
           <a href="mailto:spatterseth@gmail.com" className="underline hover:opacity-70">
