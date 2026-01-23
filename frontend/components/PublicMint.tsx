@@ -8,6 +8,7 @@ import { getContractAddress, getEtherscanBaseUrl } from '@/lib/config';
 import SpattersABI from '@/contracts/Spatters.json';
 import ConsentModal from './ConsentModal';
 import { ConsentData } from '@/lib/consent';
+import { useEthPrice } from '@/hooks/useEthPrice';
 
 // Spatters color palette
 const COLORS = {
@@ -60,6 +61,9 @@ export default function PublicMint() {
   const contractAddress = chainId ? getContractAddress(chainId) : '';
   const etherscanBase = chainId ? getEtherscanBaseUrl(chainId) : 'https://etherscan.io';
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+
+  // Fetch ETH-USD price for displaying USD equivalent
+  const { formatUsd } = useEthPrice();
 
   // Read current mint price
   const { data: mintPrice } = useReadContract({
@@ -778,6 +782,7 @@ export default function PublicMint() {
 
   // Show cooldown message with live countdown (but NOT if user has their own pending commit)
   if (isCooldownActive && previewSeeds.length === 0 && !isCurrentUserPending) {
+    const usdPrice = formatUsd(mintPrice as bigint);
     return (
       <div className="space-y-6">
         <div className="border-2 p-6" style={{ backgroundColor: COLORS.blue, borderColor: COLORS.black }}>
@@ -794,6 +799,13 @@ export default function PublicMint() {
               </p>
               <p className="text-sm text-center mt-1" style={{ color: COLORS.black, opacity: 0.7 }}>
                 until next mint available
+              </p>
+            </div>
+            <div className="border-2 p-4" style={{ backgroundColor: COLORS.background, borderColor: COLORS.black }}>
+              <p className="text-sm text-center" style={{ color: COLORS.black }}>
+                <strong>Next mint price:</strong>{' '}
+                {mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH
+                {usdPrice && <span className="opacity-70"> (~{usdPrice})</span>}
               </p>
             </div>
           </div>
@@ -1029,6 +1041,7 @@ export default function PublicMint() {
           </p>
           <p style={{ color: COLORS.black }}>
             Current Price: <strong>{mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH</strong>
+            {formatUsd(mintPrice as bigint) && <span className="opacity-70"> (~{formatUsd(mintPrice as bigint)})</span>}
           </p>
         </div>
 
@@ -1094,7 +1107,7 @@ export default function PublicMint() {
               ? 'Committing...' 
               : isRequestPending || isRequestConfirming
               ? 'Generating Options...' 
-              : `Generate 3 Options (${mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH)`}
+              : `Generate 3 Options (${mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH${formatUsd(mintPrice as bigint) ? ` ~${formatUsd(mintPrice as bigint)}` : ''})`}
           </button>
         )}
       </div>
@@ -1125,7 +1138,7 @@ export default function PublicMint() {
             </h3>
             <div className="space-y-4 mb-6">
               <p style={{ color: '#000000' }}>
-                You are about to pay <strong>{mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH</strong> to request 3 preview options. Please understand:
+                You are about to pay <strong>{mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH{formatUsd(mintPrice as bigint) ? ` (~${formatUsd(mintPrice as bigint)})` : ''}</strong> to request 3 preview options. Please understand:
               </p>
               <ul className="list-disc pl-6 space-y-2" style={{ color: '#000000' }}>
                 <li>
@@ -1136,7 +1149,7 @@ export default function PublicMint() {
                   your mint request will be <strong>automatically cancelled</strong>.
                 </li>
                 <li style={{ color: '#fc1a4a' }}>
-                  <strong>Your minting fee ({mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH) is NOT refundable</strong> if you fail to complete the selection in time.
+                  <strong>Your minting fee ({mintPrice ? formatEther(mintPrice as bigint) : '0'} ETH{formatUsd(mintPrice as bigint) ? ` ~${formatUsd(mintPrice as bigint)}` : ''}) is NOT refundable</strong> if you fail to complete the selection in time.
                 </li>
               </ul>
               
