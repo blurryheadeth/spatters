@@ -771,7 +771,7 @@ export default function Home() {
 
               {/* Generate new spatter / Reset to Token #1 */}
               <button
-                onClick={customBaseSeed ? handleResetToToken1 : handleGenerateNewSpatter}
+                onClick={handleGenerateNewSpatter}
                 disabled={isSimulationLoading}
                 className="w-full font-bold py-3 px-4 border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ 
@@ -780,7 +780,7 @@ export default function Home() {
                   color: COLORS.white
                 }}
               >
-                {customBaseSeed ? '↩️ Back to Spatter #1' : '🎲 Generate a new spatter'}
+                🎲 Generate a new spatter
               </button>
 
               <div className="border-2 p-4" style={{ backgroundColor: COLORS.red, borderColor: COLORS.black }}>
