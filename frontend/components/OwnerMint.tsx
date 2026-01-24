@@ -348,12 +348,14 @@ export default function OwnerMint() {
     const isOwnerMint = commit[3];
     
     // Check if there's a pending commit for an owner mint
+    // Since only the owner can create an owner mint, if isOwnerMint is true and current user is owner,
+    // they must be the one who created it (no need to wait for activeMintRequester to load)
     if (pendingCommitTimestamp > BigInt(0) && isOwnerMint) {
-      // Verify this commit belongs to the current user
-      const userIsRequester = activeMintRequester && 
-        activeMintRequester.toLowerCase() === address.toLowerCase();
-      
-      if (!userIsRequester) return;
+      // Double-check with activeMintRequester if available, but don't require it
+      // If activeMintRequester is loaded and doesn't match, skip (handles edge cases)
+      if (activeMintRequester && activeMintRequester.toLowerCase() !== address.toLowerCase()) {
+        return;
+      }
       
       // Check if request hasn't been made yet (seeds not generated)
       const request = pendingRequest as { seeds: string[]; timestamp: bigint } | undefined;

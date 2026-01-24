@@ -140,6 +140,9 @@ export default function PublicMint() {
   const mintSelectionInProgress = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[0] : false;
   const activeMintRequester = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[1] : null;
   const activeMintRequestExpiry = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[2] : BigInt(0);
+  
+  // Track if critical data has loaded (to avoid showing "available" UI during loading)
+  const isDataLoaded = mintSelectionData !== undefined && pendingCommitData !== undefined;
 
   // Check last global mint time for cooldown
   const { data: lastGlobalMintTime } = useReadContract({
@@ -802,8 +805,22 @@ export default function PublicMint() {
     );
   }
 
-  // Show blocked message if someone else has a pending selection
-  if (mintSelectionInProgress && !isCurrentUserPending && previewSeeds.length === 0) {
+  // Check if there's a pending owner mint that blocks public minting
+  // This covers the case where owner committed (step 1) but hasn't requested yet (step 2)
+  const pendingCommit = pendingCommitData as [bigint, bigint, boolean, boolean] | undefined;
+  const hasPendingOwnerCommit = pendingCommit && pendingCommit[1] > BigInt(0) && pendingCommit[3]; // timestamp > 0 AND isOwnerMint
+  
+  // Show loading state while critical data is being fetched
+  if (!isDataLoaded && previewSeeds.length === 0) {
+    return (
+      <div className="text-center p-8 border-2" style={{ backgroundColor: COLORS.white, borderColor: COLORS.black }}>
+        <p className="text-lg" style={{ color: COLORS.black }}>Loading mint status...</p>
+      </div>
+    );
+  }
+
+  // Show blocked message if someone else has a pending selection OR there's a pending owner commit
+  if ((mintSelectionInProgress || hasPendingOwnerCommit) && !isCurrentUserPending && previewSeeds.length === 0) {
     const remainingTime = getRemainingTime();
     return (
       <div className="space-y-6">
