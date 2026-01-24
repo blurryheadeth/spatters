@@ -141,8 +141,15 @@ export default function PublicMint() {
   const activeMintRequester = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[1] : null;
   const activeMintRequestExpiry = mintSelectionData ? (mintSelectionData as [boolean, string, bigint])[2] : BigInt(0);
   
-  // Track if critical data has loaded (to avoid showing "available" UI during loading)
-  const isDataLoaded = mintSelectionData !== undefined && pendingCommitData !== undefined;
+  // Track if ALL critical data has loaded (to avoid showing "available" UI during loading)
+  // CONSERVATIVE: Require ALL blocking-related data to be loaded before showing mint UI
+  const isDataLoaded = 
+    mintSelectionData !== undefined && 
+    pendingCommitData !== undefined &&
+    totalSupply !== undefined &&
+    ownerReserve !== undefined &&
+    maxSupply !== undefined &&
+    lastGlobalMintTime !== undefined;
 
   // Check last global mint time for cooldown
   const { data: lastGlobalMintTime } = useReadContract({
