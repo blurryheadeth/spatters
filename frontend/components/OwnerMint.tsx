@@ -997,6 +997,57 @@ export default function OwnerMint() {
             </div>
           </div>
         )}
+
+        {/* Commit Countdown Modal - shown when returning to page after step 1 complete */}
+        {showCommitModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+            <div 
+              className="max-w-lg w-full p-6 border-2"
+              style={{ backgroundColor: '#FFFFFF', borderColor: '#000000' }}
+            >
+              <h3 className="text-2xl font-bold mb-4 text-center" style={{ color: '#2587c3' }}>
+                ⏳ Pending Mint Commit
+              </h3>
+              <div className="space-y-4 mb-6">
+                <p style={{ color: '#000000' }}>
+                  You have a pending mint commit. Please wait for secure randomness and then generate your 3 preview options.
+                </p>
+                <div className="border-2 p-4 text-center" style={{ backgroundColor: '#EBE5D9', borderColor: '#2587c3' }}>
+                  <p className="text-sm mb-2" style={{ color: '#000000' }}>
+                    {commitCountdown > 0 ? 'Please wait for secure randomness...' : 'Ready to generate previews!'}
+                  </p>
+                  <p className="text-4xl font-bold" style={{ color: '#2587c3' }}>
+                    {commitCountdown > 0 ? `${commitCountdown}s` : '✓'}
+                  </p>
+                </div>
+                <div className="border-2 p-3" style={{ backgroundColor: '#fc1a4a', borderColor: '#000000' }}>
+                  <p className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
+                    ⚠️ Remember: You have <strong>{remaining45MinTime}</strong> to complete your selection or your mint will expire.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowCommitModal(false);
+                  handleRequestOwnerMint();
+                }}
+                disabled={commitCountdown > 0 || isRequestPending || isRequestConfirming}
+                className="w-full py-3 px-6 font-bold border-2 transition-opacity hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: commitCountdown > 0 ? '#EBE5D9' : '#2587c3', 
+                  borderColor: '#000000', 
+                  color: commitCountdown > 0 ? '#000000' : '#FFFFFF' 
+                }}
+              >
+                {isRequestPending || isRequestConfirming 
+                  ? 'Generating...' 
+                  : commitCountdown > 0 
+                    ? `Wait ${commitCountdown}s...` 
+                    : 'Generate 3 Preview Options'}
+              </button>
+            </div>
+          </div>
+        )}
       </>
     );
   }
