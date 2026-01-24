@@ -395,6 +395,48 @@ export default function OwnerMint() {
     return `${minutes}m ${seconds}s`;
   };
 
+  // Auto-detect pending commit on page load and show countdown modal
+  useEffect(() => {
+    if (!pendingCommitData || !address) return;
+    
+    // pendingCommit returns tuple: [commitBlock, timestamp, hasCustomPalette, isOwnerMint]
+    const commit = pendingCommitData as [bigint, bigint, boolean, boolean];
+    const commitTimestamp = commit[1];
+    const isOwnerMint = commit[3];
+
+    // Check if there's a pending commit for an owner mint
+    if (commitTimestamp > BigInt(0) && isOwnerMint) {
+      // Verify this commit belongs to the current user
+      const userIsRequester = activeMintRequester && 
+        activeMintRequester.toLowerCase() === address.toLowerCase();
+      
+      if (!userIsRequester) return;
+      
+      // Check if request hasn't been made yet (seeds not generated)
+      const request = pendingRequest as { seeds: string[]; timestamp: bigint } | undefined;
+      const hasSeeds = request?.seeds?.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
+      
+      // Don't show commit modal if seeds are already generated (preview mode)
+      if (!hasSeeds) {
+        // Check if commit hasn't expired
+        const commitTime = Number(commitTimestamp);
+        const expirationTime = commitTime + (45 * 60);
+        const now = Math.floor(Date.now() / 1000);
+        
+        if (now < expirationTime) {
+          // Close any other modals and open the commit countdown modal
+          setShowConfirmModal(false);
+          setShowCommitModal(true);
+          
+          // Calculate how much time has passed since commit
+          const elapsed = now - commitTime;
+          const countdownRemaining = Math.max(0, 30 - elapsed);
+          setCommitCountdown(Math.floor(countdownRemaining));
+        }
+      }
+    }
+  }, [pendingCommitData, address, activeMintRequester, pendingRequest]);
+
   // Handle commit confirmation - show countdown modal
   useEffect(() => {
     if (isCommitConfirmed) {
