@@ -75,6 +75,10 @@ export default function PublicMint() {
   const [showCommitModal, setShowCommitModal] = useState(false);
   const [commitCountdown, setCommitCountdown] = useState(30);
   
+  // Track commit timestamp for calculating remaining 45-minute window
+  const [commitTimestamp, setCommitTimestamp] = useState<number | null>(null);
+  const [remaining45MinTime, setRemaining45MinTime] = useState<string>('45 minutes');
+  
   // Cache-bust timestamp - refreshed when preview seeds change to avoid stale cached previews
   const cacheBustRef = useRef<number>(Date.now());
   
@@ -383,6 +387,9 @@ export default function PublicMint() {
           setShowConfirmModal(false);
           setShowCommitModal(true);
           
+          // Store commit timestamp for 45-minute countdown
+          setCommitTimestamp(commitTime);
+          
           // Calculate how much time has passed since commit
           const elapsed = now - commitTime;
           const countdownRemaining = Math.max(0, 30 - elapsed);
@@ -436,6 +443,8 @@ export default function PublicMint() {
     if (isCommitConfirmed) {
       setShowCommitModal(true);
       setCommitCountdown(30);
+      // Set commit timestamp to now (user just committed)
+      setCommitTimestamp(Math.floor(Date.now() / 1000));
     }
   }, [isCommitConfirmed]);
 
@@ -449,6 +458,31 @@ export default function PublicMint() {
     
     return () => clearInterval(timer);
   }, [showCommitModal, showConfirmModal, commitCountdown]);
+
+  // Update the "45 minutes" countdown in commit modal
+  useEffect(() => {
+    if (!commitTimestamp || !showCommitModal) return;
+    
+    const updateRemaining45Min = () => {
+      const now = Math.floor(Date.now() / 1000);
+      const expirationTime = commitTimestamp + (45 * 60);
+      const remaining = Math.max(0, expirationTime - now);
+      
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      
+      if (remaining > 0) {
+        setRemaining45MinTime(`${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`);
+      } else {
+        setRemaining45MinTime('expired');
+      }
+    };
+    
+    updateRemaining45Min();
+    const interval = setInterval(updateRemaining45Min, 1000);
+    
+    return () => clearInterval(interval);
+  }, [commitTimestamp, showCommitModal]);
 
   // Handle request confirmation - extract seeds from pending request
   useEffect(() => {
@@ -1284,7 +1318,7 @@ export default function PublicMint() {
               </div>
               <div className="border-2 p-3" style={{ backgroundColor: '#fc1a4a', borderColor: '#000000' }}>
                 <p className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
-                  ⚠️ Remember: You have <strong>45 minutes</strong> from now to complete your selection or your payment is forfeited.
+                  ⚠️ Remember: You have <strong>{remaining45MinTime}</strong> to complete your selection or your payment is forfeited.
                 </p>
               </div>
             </div>

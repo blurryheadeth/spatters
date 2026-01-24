@@ -121,6 +121,10 @@ export default function OwnerMint() {
   const [showCommitModal, setShowCommitModal] = useState(false);
   const [commitCountdown, setCommitCountdown] = useState(30);
   
+  // Track commit timestamp for calculating remaining 45-minute window
+  const [commitTimestamp, setCommitTimestamp] = useState<number | null>(null);
+  const [remaining45MinTime, setRemaining45MinTime] = useState<string>('45 minutes');
+  
   // Cache-bust timestamp - refreshed when preview seeds change to avoid stale cached previews
   const cacheBustRef = useRef<number>(Date.now());
   
@@ -340,11 +344,11 @@ export default function OwnerMint() {
     
     // pendingCommit returns tuple: [commitBlock, timestamp, hasCustomPalette, isOwnerMint]
     const commit = pendingCommitData as [bigint, bigint, boolean, boolean];
-    const commitTimestamp = commit[1];
+    const pendingCommitTimestamp = commit[1];
     const isOwnerMint = commit[3];
     
     // Check if there's a pending commit for an owner mint
-    if (commitTimestamp > BigInt(0) && isOwnerMint) {
+    if (pendingCommitTimestamp > BigInt(0) && isOwnerMint) {
       // Verify this commit belongs to the current user
       const userIsRequester = activeMintRequester && 
         activeMintRequester.toLowerCase() === address.toLowerCase();
@@ -358,7 +362,7 @@ export default function OwnerMint() {
       // Don't show commit modal if seeds are already generated (preview mode)
       if (!hasSeeds) {
         // Check if commit hasn't expired
-        const commitTime = Number(commitTimestamp);
+        const commitTime = Number(pendingCommitTimestamp);
         const expirationTime = commitTime + (45 * 60);
         const now = Math.floor(Date.now() / 1000);
         
@@ -366,6 +370,9 @@ export default function OwnerMint() {
           // Close any other modals and open the commit countdown modal
           setShowConfirmModal(false);
           setShowCommitModal(true);
+          
+          // Store commit timestamp for 45-minute countdown
+          setCommitTimestamp(commitTime);
           
           // Calculate how much time has passed since commit
           const elapsed = now - commitTime;
@@ -395,53 +402,13 @@ export default function OwnerMint() {
     return `${minutes}m ${seconds}s`;
   };
 
-  // Auto-detect pending commit on page load and show countdown modal
-  useEffect(() => {
-    if (!pendingCommitData || !address) return;
-    
-    // pendingCommit returns tuple: [commitBlock, timestamp, hasCustomPalette, isOwnerMint]
-    const commit = pendingCommitData as [bigint, bigint, boolean, boolean];
-    const commitTimestamp = commit[1];
-    const isOwnerMint = commit[3];
-
-    // Check if there's a pending commit for an owner mint
-    if (commitTimestamp > BigInt(0) && isOwnerMint) {
-      // Verify this commit belongs to the current user
-      const userIsRequester = activeMintRequester && 
-        activeMintRequester.toLowerCase() === address.toLowerCase();
-      
-      if (!userIsRequester) return;
-      
-      // Check if request hasn't been made yet (seeds not generated)
-      const request = pendingRequest as { seeds: string[]; timestamp: bigint } | undefined;
-      const hasSeeds = request?.seeds?.some(s => s !== '0x0000000000000000000000000000000000000000000000000000000000000000');
-      
-      // Don't show commit modal if seeds are already generated (preview mode)
-      if (!hasSeeds) {
-        // Check if commit hasn't expired
-        const commitTime = Number(commitTimestamp);
-        const expirationTime = commitTime + (45 * 60);
-        const now = Math.floor(Date.now() / 1000);
-        
-        if (now < expirationTime) {
-          // Close any other modals and open the commit countdown modal
-          setShowConfirmModal(false);
-          setShowCommitModal(true);
-          
-          // Calculate how much time has passed since commit
-          const elapsed = now - commitTime;
-          const countdownRemaining = Math.max(0, 30 - elapsed);
-          setCommitCountdown(Math.floor(countdownRemaining));
-        }
-      }
-    }
-  }, [pendingCommitData, address, activeMintRequester, pendingRequest]);
-
   // Handle commit confirmation - show countdown modal
   useEffect(() => {
     if (isCommitConfirmed) {
       setShowCommitModal(true);
       setCommitCountdown(30);
+      // Set commit timestamp to now (user just committed)
+      setCommitTimestamp(Math.floor(Date.now() / 1000));
     }
   }, [isCommitConfirmed]);
 
@@ -455,6 +422,31 @@ export default function OwnerMint() {
     
     return () => clearInterval(timer);
   }, [showCommitModal, showConfirmModal, commitCountdown]);
+
+  // Update the "45 minutes" countdown in commit modal
+  useEffect(() => {
+    if (!commitTimestamp || !showCommitModal) return;
+    
+    const updateRemaining45Min = () => {
+      const now = Math.floor(Date.now() / 1000);
+      const expirationTime = commitTimestamp + (45 * 60);
+      const remaining = Math.max(0, expirationTime - now);
+      
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      
+      if (remaining > 0) {
+        setRemaining45MinTime(`${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`);
+      } else {
+        setRemaining45MinTime('expired');
+      }
+    };
+    
+    updateRemaining45Min();
+    const interval = setInterval(updateRemaining45Min, 1000);
+    
+    return () => clearInterval(interval);
+  }, [commitTimestamp, showCommitModal]);
 
   // Handle request confirmation - extract seeds from pending request
   useEffect(() => {
@@ -1561,7 +1553,7 @@ export default function OwnerMint() {
                 </div>
                 <div className="border-2 p-3" style={{ backgroundColor: '#fc1a4a', borderColor: '#000000' }}>
                   <p className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
-                    ⚠️ Remember: You have <strong>45 minutes</strong> from now to complete your selection.
+                    ⚠️ Remember: You have <strong>{remaining45MinTime}</strong> to complete your selection.
                   </p>
                 </div>
               </div>
