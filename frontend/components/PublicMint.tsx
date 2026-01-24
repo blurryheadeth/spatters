@@ -611,15 +611,18 @@ export default function PublicMint() {
       // Update consent record with mint completion details
       // The initial consent was stored immediately after signing (before fee payment)
       // Now we update it with the tx hash and token ID to mark it complete
-      if (consentData && completeHash) {
+      // Even if consentData was lost (browser closed), the API can find the record by wallet address
+      if (completeHash && address) {
         console.log('[PublicMint] Updating consent with mint completion');
         fetch('/api/consent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...consentData,
+            walletAddress: address,
             mintTxHash: completeHash,
             tokenId: newTokenId,
+            // Include consent data if available (for exact matching by signature)
+            ...(consentData || {}),
           }),
         })
           .then(res => res.json())
@@ -631,7 +634,7 @@ export default function PublicMint() {
           .catch(err => console.error('[PublicMint] Consent completion update error:', err));
       } else {
         console.warn('[PublicMint] Cannot update consent completion - missing data:', {
-          hasConsentData: !!consentData,
+          hasAddress: !!address,
           hasCompleteHash: !!completeHash,
         });
       }

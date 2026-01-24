@@ -43,43 +43,69 @@ export async function POST(request: NextRequest) {
       tokenId 
     } = body;
 
-    // Validate required fields for initial consent
-    if (!walletAddress || !signature || !message || !termsVersion) {
+    // Validate wallet address (always required)
+    if (!walletAddress) {
       return NextResponse.json(
-        { error: 'Missing required fields: walletAddress, signature, message, termsVersion' },
+        { error: 'Missing required field: walletAddress' },
         { status: 400 }
       );
     }
 
-    // Verify the signature is valid for this message and address
-    let isValidSignature = false;
-    try {
-      isValidSignature = await verifyMessage({
-        address: walletAddress as `0x${string}`,
-        message,
-        signature: signature as `0x${string}`,
-      });
-    } catch (e) {
-      console.error('Signature verification error:', e);
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 400 }
-      );
-    }
+    // For initial consent storage, validate and verify signature
+    // For completion update (with mintTxHash), signature is optional (will be looked up)
+    if (!mintTxHash) {
+      // Initial consent storage - require full consent data
+      if (!signature || !message || !termsVersion) {
+        return NextResponse.json(
+          { error: 'Missing required fields for initial consent: signature, message, termsVersion' },
+          { status: 400 }
+        );
+      }
 
-    if (!isValidSignature) {
-      return NextResponse.json(
-        { error: 'Signature verification failed' },
-        { status: 400 }
-      );
-    }
+      // Verify the signature is valid for this message and address
+      let isValidSignature = false;
+      try {
+        isValidSignature = await verifyMessage({
+          address: walletAddress as `0x${string}`,
+          message,
+          signature: signature as `0x${string}`,
+        });
+      } catch (e) {
+        console.error('Signature verification error:', e);
+        return NextResponse.json(
+          { error: 'Invalid signature' },
+          { status: 400 }
+        );
+      }
 
-    // Verify the message content is valid
-    if (!verifyConsentMessage(message, walletAddress)) {
-      return NextResponse.json(
-        { error: 'Invalid consent message format' },
-        { status: 400 }
-      );
+      if (!isValidSignature) {
+        return NextResponse.json(
+          { error: 'Signature verification failed' },
+          { status: 400 }
+        );
+      }
+
+      // Verify the message content is valid
+      if (!verifyConsentMessage(message, walletAddress)) {
+        return NextResponse.json(
+          { error: 'Invalid consent message format' },
+          { status: 400 }
+        );
+      }
+    } else if (signature && message) {
+      // Optional: verify signature if provided during completion update
+      try {
+        const isValidSignature = await verifyMessage({
+          address: walletAddress as `0x${string}`,
+          message,
+          signature: signature as `0x${string}`,
+        });
+        if (!isValidSignature) {
+          console.warn('[Consent API] Invalid signature provided during completion update');
+        }
+      } catch (e) {
+        console.warn('[Consent API] Signature verification failed during completion update:', e);
+      }
     }
 
     // Check if Supabase is configured
@@ -129,20 +155,38 @@ export async function POST(request: NextRequest) {
     // Update existing record when mint completes
     console.log('[Consent API] Updating consent with mint completion for wallet:', walletAddress);
     
-    // Find the most recent pending consent for this wallet/signature combo
-    const { data: existingConsent, error: findError } = await supabase
+    // Find the most recent pending consent for this wallet
+    // If signature is provided, match exactly; otherwise find any pending for this wallet
+    const query = supabase
       .from('mint_consent')
-      .select('id')
+      .select('id, signature, message, terms_version')
       .eq('wallet_address', walletAddress.toLowerCase())
-      .eq('signature', signature)
       .eq('mint_completed', false)
       .order('signed_at', { ascending: false })
-      .limit(1)
-      .single();
+      .limit(1);
+    
+    // Add signature filter only if provided (for exact matching)
+    if (signature) {
+      query.eq('signature', signature);
+    }
+    
+    const { data: existingConsent, error: findError } = await query.single();
 
     if (findError || !existingConsent) {
-      // No pending consent found - create a new complete record
-      // This handles edge cases where initial storage failed
+      // No pending consent found
+      if (!signature || !message || !termsVersion) {
+        // Can't create a new record without full consent data
+        console.error('[Consent API] No pending consent found and insufficient data to create new record');
+        return NextResponse.json(
+          { 
+            error: 'No pending consent found for this wallet',
+            details: 'User must sign consent before minting'
+          },
+          { status: 404 }
+        );
+      }
+      
+      // Create a new complete record (handles edge cases where initial storage failed)
       console.log('[Consent API] No pending consent found, creating complete record');
       
       const { error: insertError } = await supabase
