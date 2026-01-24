@@ -816,6 +816,7 @@ export default function PublicMint() {
   // This covers the case where owner committed (step 1) but hasn't requested yet (step 2)
   const pendingCommit = pendingCommitData as [bigint, bigint, boolean, boolean] | undefined;
   const hasPendingOwnerCommit = pendingCommit && pendingCommit[1] > BigInt(0) && pendingCommit[3]; // timestamp > 0 AND isOwnerMint
+  const isOwnerMintPending = pendingCommit && pendingCommit[3]; // Check if pending commit is owner mint
   
   // Show loading state while critical data is being fetched
   if (!isDataLoaded && previewSeeds.length === 0) {
@@ -827,7 +828,10 @@ export default function PublicMint() {
   }
 
   // Show blocked message if someone else has a pending selection OR there's a pending owner commit
-  if ((mintSelectionInProgress || hasPendingOwnerCommit) && !isCurrentUserPending && previewSeeds.length === 0) {
+  // IMPORTANT: Even if isCurrentUserPending is true, we should block if the pending mint is an OWNER mint
+  // (because the owner can't continue their owner mint from the public mint interface)
+  const shouldBypassBlock = isCurrentUserPending && !isOwnerMintPending; // Only bypass if it's user's PUBLIC mint
+  if ((mintSelectionInProgress || hasPendingOwnerCommit) && !shouldBypassBlock && previewSeeds.length === 0) {
     const remainingTime = getRemainingTime();
     return (
       <div className="space-y-6">
@@ -871,8 +875,9 @@ export default function PublicMint() {
     );
   }
 
-  // Show cooldown message with live countdown (but NOT if user has their own pending commit)
-  if (isCooldownActive && previewSeeds.length === 0 && !isCurrentUserPending) {
+  // Show cooldown message with live countdown (but NOT if user has their own pending PUBLIC commit)
+  // Owner with pending OWNER mint should still see cooldown for public mints
+  if (isCooldownActive && previewSeeds.length === 0 && !shouldBypassBlock) {
     const usdPrice = formatUsd(mintPrice as bigint);
     return (
       <div className="space-y-6">
