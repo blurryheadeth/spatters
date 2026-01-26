@@ -1145,7 +1145,7 @@ export default function PublicMint() {
           <h3 className="font-bold mb-2" style={{ color: COLORS.blue }}>How it works:</h3>
           <ol className="list-decimal list-inside text-sm space-y-1" style={{ color: COLORS.black }}>
             <li>Pay the mint price to commit your request</li>
-            <li>Wait ~15 seconds for secure randomness, then view 3 options</li>
+            <li>Wait 30 seconds for secure randomness, then view 3 options</li>
             <li>Preview all 3 options and choose your favorite</li>
             <li>Confirm your selection to mint your chosen artwork</li>
           </ol>
