@@ -1121,9 +1121,9 @@ export default function Home() {
                 the appliances used or even the kitchen's room temperature and humidity.
               </p>
               <p className="mb-3 leading-relaxed">
-                In generative art, the artist does not know exactly what the artwork will look like until it is created. 
-                In this moment of creation, the artist's instructions come together with the execution of the algorithm by 
-                a computer to produce an artwork that is unique and unpredictable in its details. Any piece of generative art 
+                In generative art, the artist does not know exactly what the artwork will look like until it is created. In this 
+                moment of creation, the artist's instructions come together with the execution of the algorithm by a computer or 
+                other device to produce an artwork that is unique and unpredictable in its details. Any piece of generative art 
                 requires this moment of collaboration between artist, machine and someone who decides to execute the algorithm.  
               </p>
               <p className="leading-relaxed">
