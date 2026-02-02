@@ -1121,6 +1121,12 @@ export default function Home() {
                 the appliances used or even the kitchen's room temperature and humidity.
               </p>
               <p className="leading-relaxed">
+                In generative art, the artist does not know exactly what the artwork will look like until it is created. 
+                In this moment of creation, the artist's instructions come together with the execution of the algorithm by 
+                a computer to produce an artwork that is unique and unpredictable in its details. Any piece of generative art 
+                requires this moment of collaboration between artist, machine and someone who decides to execute the algorithm.  
+              </p>
+              <p className="leading-relaxed">
                 Simple examples include fractal patterns, where mathematical formulas create infinitely complex shapes, 
                 or particle systems where thousands of simulated dots follow physics rules to create flowing, organic visuals. 
                 In Spatters, the algorithm creates abstract compositions by placing points, shapes, and colors according to 
@@ -1134,19 +1140,34 @@ export default function Home() {
                 How does blockchain enable generative art?
               </h4>
               <p className="mb-3 leading-relaxed">
-                Blockchain technology solves a fundamental challenge in generative art: a source of randomness and permanence. 
-                When you mint a generative NFT, the blockchain can provide a unique &quot;seed&quot;, which is a pseudo-random 
-                value derived from transaction data that no one could have predicted before the transaction was sent. This seed 
-                can serve as input for the artist&apos;s algorithm to generate a one-of-a-kind artwork. Because the algorithm 
-                and seed are stored on-chain, anyone can verify that your specific artwork was genuinely generated at the time it 
-                was created (or &quot;minted&quot;, since creating an NFT is also called &quot;minting&quot;).
+                Blockchain technology can support generative art in three main areas: permanence, provable ownership and a source 
+                of randomness. The blockchain can provide a unique &quot;seed&quot;, which is a pseudo-random value derived from 
+                transaction data that no one could have predicted before a transaction was sent, and store this seed on-chain 
+                associated to a kind of token that is unique and can be owned. This type of unique token is called an NFT and, 
+                once created, it will be preserved for as long as the blockchain continues to exist. The seed linked to this token 
+                can serve as input for the artist&apos;s algorithm to generate a one-of-a-kind artwork. If the algorithm is also  
+                stored on-chain like the seed, anyone can verify that a specific artwork was genuinely generated at the time it 
+                was created (or &quot;minted&quot;, since creating an NFT is also called &quot;minting&quot;). In addition, it 
+                can be recreated at any time and it is also possible to prove who owns the token associated to that seed.
               </p>
               <p className="leading-relaxed">
-                The blockchain also ensures permanence: unlike traditional digital art that relies on servers and hosting, 
+                The whole process would therefore look like this: first, an artist uploads a generative algorithm to a blockchain; 
+                then, someone decides to have that algorithm create a new artwork and requests this with a blockchain transaction. 
+                Finally, a seed value is obtained from that transaction's unpredictable data and associated to an NFT, which is 
+                sent to whoever decided to execute the algorithm. Now, anyone can check what seed value is associated to that 
+                NFT, feed it to the algorithm and see what art comes out. That resulting artwork is associated to that NFT.  
+                In other words, an NFT, which can be owned, serves as a "certificate of ownership" for an artwork, which can  
+                be recreated at any time by anyone. Since the full instructions to generate the artwork are stored on-chain,
+                there is objectively one single unique artwork that can be generated associated to each NFT. Anyone can create 
+                the art, but just one person can be objectively proved to own it.
+              </p>
+              <p className="leading-relaxed">
+                This kind of permanence is more robust than other alternatives: unlike traditional digital art that relies 
+                on servers and hosting, which ultimately depend on one single person or company maintaining those servers,
                 fully on-chain generative art exists as long as the blockchain itself does. The code, the seeds, and all 
-                the data needed to recreate the artwork live permanently in a decentralized, censorship-resistant system. 
-                This means that even if this website disappears, anyone can recreate the images associated with your Spatter 
-                as long as Ethereum exists.
+                the data needed to recreate the artwork and prove is ownership live permanently in a decentralized, 
+                censorship-resistant system. This means that even if this website disappears, for as long as Ethereum exists 
+                you an continue to prove that you own your Spatter and anyone can recreate the images associated with it.
               </p>
             </div>
 
@@ -1172,8 +1193,13 @@ export default function Home() {
                 adding a new layer generated from a fresh blockchain seed.
               </p>
               <p className="mb-3 leading-relaxed">
-                The seed that serves as input for the Spatters algorithm, both for the initial mint and for mutations, 
-                is a large number computed as a combination of who is executing the code (blockchain wallet address) and 
+                In a comparison with an oil painting, this mechanism would be like anyone who owns that painting being able to 
+                add an additional brush stroke to the painting on specific dates each year, but always following a fixed set of 
+                unbreakable rules defined by the artist.
+              </p>
+              <p className="mb-3 leading-relaxed">
+                The seeds that serve as inputs for the Spatters algorithm, both for the initial mint and for mutations, 
+                are large numbers computed as a combination of who is executing the code (blockchain wallet address) and 
                 when (blockchain block timestamp). Different people executing the same code at the same time would 
                 therefore get different results, as would the same person executing the algorithm at different times. 
                 The artwork that the algorithm generates thus depends on who created it and when, as well as who decided 
