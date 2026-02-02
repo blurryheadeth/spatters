@@ -1165,7 +1165,7 @@ export default function Home() {
                 This kind of permanence is more robust than other alternatives: unlike traditional digital art that relies 
                 on servers and hosting, which ultimately depend on one single person or company maintaining those servers,
                 fully on-chain generative art exists as long as the blockchain itself does. The code, the seeds, and all 
-                the data needed to recreate the artwork and prove is ownership live permanently in a decentralized, 
+                the data needed to recreate the artwork and prove its ownership live permanently in a decentralized, 
                 censorship-resistant system. This means that even if this website disappears, for as long as Ethereum exists 
                 you an continue to prove that you own your Spatter and anyone can recreate the images associated with it.
               </p>
