@@ -1120,7 +1120,7 @@ export default function Home() {
                 the recipe is cooked, it produces something different which depends on factors such as the ingredients, 
                 the appliances used or even the kitchen's room temperature and humidity.
               </p>
-              <p className="leading-relaxed">
+              <p className="mb-3 leading-relaxed">
                 In generative art, the artist does not know exactly what the artwork will look like until it is created. 
                 In this moment of creation, the artist's instructions come together with the execution of the algorithm by 
                 a computer to produce an artwork that is unique and unpredictable in its details. Any piece of generative art 
@@ -1150,7 +1150,7 @@ export default function Home() {
                 was created (or &quot;minted&quot;, since creating an NFT is also called &quot;minting&quot;). In addition, it 
                 can be recreated at any time and it is also possible to prove who owns the token associated to that seed.
               </p>
-              <p className="leading-relaxed">
+              <p className="mb-3 leading-relaxed">
                 The whole process would therefore look like this: first, an artist uploads a generative algorithm to a blockchain; 
                 then, someone decides to have that algorithm create a new artwork and requests this with a blockchain transaction. 
                 Finally, a seed value is obtained from that transaction's unpredictable data and associated to an NFT, which is 
