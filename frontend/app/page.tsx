@@ -1159,7 +1159,7 @@ export default function Home() {
                 In other words, an NFT, which can be owned, serves as a "certificate of ownership" for an artwork, which can  
                 be recreated at any time by anyone. Since the full instructions to generate the artwork are stored on-chain,
                 there is objectively one single unique artwork that can be generated associated to each NFT. Anyone can create 
-                the art, but just one person can be objectively proved to own it.
+                the art, but just one person can be objectively proven to own it.
               </p>
               <p className="leading-relaxed">
                 This kind of permanence is more robust than other alternatives: unlike traditional digital art that relies 
