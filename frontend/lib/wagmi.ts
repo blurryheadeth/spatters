@@ -12,8 +12,8 @@ export const config = getDefaultConfig({
     sepolia,
   ],
   transports: {
-    [mainnet.id]: http(process.env.NEXT_PUBLIC_MAINNET_RPC_URL || 'https://eth.llamarpc.com'),
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || 'https://eth-sepolia.public.blastapi.io'),
+    [mainnet.id]: http('/api/rpc?network=mainnet'),
+    [sepolia.id]: http('/api/rpc?network=sepolia'),
   },
   ssr: true,
 });
