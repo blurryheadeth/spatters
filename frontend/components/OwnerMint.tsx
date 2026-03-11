@@ -1546,11 +1546,11 @@ export default function OwnerMint() {
 
                 <div className="border-2 p-4" style={{ backgroundColor: '#f2c945', borderColor: '#000000' }}>
                   <p className="text-sm font-bold mb-2" style={{ color: '#000000' }}>
-                    ⚠️ Have You Tested Your Hardware?
+                    ❗️ Have You Tested Your Hardware?
                   </p>
                   <p className="text-sm" style={{ color: '#000000' }}>
                     If you haven&apos;t already, <strong>please test your device BEFORE initiating your mint</strong> by 
-                    using the <strong>&quot;Generate a new spatter&quot;</strong> button and the <strong>&quot;General &gt; Change aspect ratio&quot;</strong> simulation option on the landing page.
+                    using the <strong>&quot;Generate a new spatter&quot;</strong> button and the <strong>&quot;General &gt; Change aspect ratio&quot;</strong> button within the Add simulated simulation button on the landing page.
                     Continue generating new spatters and applying aspect ratio mutations as many times as needed until you have seen large height-width aspect ratios render properly on your device, which generally requires at least 20 tries.
                   </p>
                 </div>
