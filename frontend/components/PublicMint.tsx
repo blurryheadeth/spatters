@@ -285,6 +285,15 @@ export default function PublicMint() {
     return now < expirationTime;
   };
 
+  // Helper to check if a pending commit is still within the 45-minute window
+  const isCommitStillValid = (timestamp: bigint): boolean => {
+    const commitTime = Number(timestamp);
+    if (commitTime === 0) return false;
+    const expirationTime = commitTime + (45 * 60); // 45 minutes
+    const now = Math.floor(Date.now() / 1000);
+    return now < expirationTime;
+  };
+
   // Track if user's pending request is expired
   const [isRequestExpired, setIsRequestExpired] = useState(false);
   
@@ -815,8 +824,16 @@ export default function PublicMint() {
   // Check if there's a pending owner mint that blocks public minting
   // This covers the case where owner committed (step 1) but hasn't requested yet (step 2)
   const pendingCommit = pendingCommitData as [bigint, bigint, boolean, boolean] | undefined;
-  const hasPendingOwnerCommit = pendingCommit && pendingCommit[1] > BigInt(0) && pendingCommit[3]; // timestamp > 0 AND isOwnerMint
-  const isOwnerMintPending = pendingCommit && pendingCommit[3]; // Check if pending commit is owner mint
+  const hasPendingOwnerCommit = !!(
+    pendingCommit &&
+    pendingCommit[3] &&
+    isCommitStillValid(pendingCommit[1])
+  );
+  const isOwnerMintPending = !!(
+    pendingCommit &&
+    pendingCommit[3] &&
+    isCommitStillValid(pendingCommit[1])
+  );
   
   // Show loading state while critical data is being fetched
   if (!isDataLoaded && previewSeeds.length === 0) {
@@ -863,7 +880,10 @@ export default function PublicMint() {
               )}
             </div>
             <button
-              onClick={() => refetchMintStatus()}
+              onClick={() => {
+                refetchMintStatus();
+                refetchPendingCommit();
+              }}
               className="w-full font-bold py-2 px-4 border-2 hover:opacity-70 transition-opacity"
               style={{ backgroundColor: COLORS.black, borderColor: COLORS.black, color: COLORS.white }}
             >
@@ -1287,12 +1307,12 @@ export default function PublicMint() {
 
               <div className="border-2 p-4" style={{ backgroundColor: '#f2c945', borderColor: '#000000' }}>
                 <p className="text-sm font-bold mb-2" style={{ color: '#000000' }}>
-                  ⚠️ Have You Tested Your Hardware?
+                  ❗️ Have You Tested Your Hardware?
                 </p>
                 <p className="text-sm" style={{ color: '#000000' }}>
                   If you haven&apos;t already, <strong>please test your device BEFORE paying the minting fee</strong> by 
-                  using the <strong>&quot;Generate a new spatter&quot;</strong> button in the simulation section on the landing page. 
-                  Generate at least 15 fresh spatters to ensure your browser can handle the computational load without crashing.
+                  using the <strong>&quot;Generate a new spatter&quot;</strong> button and the <strong>&quot;General &gt; Change aspect ratio&quot;</strong> button within the Add simulated simulation button on the landing page.
+                  Continue generating new spatters and applying aspect ratio mutations as many times as needed until you have seen large height-width aspect ratios render properly on your device, which generally requires at least 20 tries.
                 </p>
               </div>
 

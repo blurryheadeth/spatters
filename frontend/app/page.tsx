@@ -359,10 +359,10 @@ export default function Home() {
   // Generate a fresh random spatter
   const handleGenerateNewSpatter = () => {
     setIsSimulationLoading(true);
-    // Generate a random bytes32 seed from timestamp + random
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 0xFFFFFFFF);
-    const seedHex = '0x' + timestamp.toString(16).padStart(16, '0') + random.toString(16).padStart(8, '0') + '0'.repeat(40);
+    // Use full random bytes so the truncated preview seed still has strong entropy.
+    const seedBytes = new Uint8Array(32);
+    crypto.getRandomValues(seedBytes);
+    const seedHex = `0x${Array.from(seedBytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
     setCustomBaseSeed(seedHex);
     setDemoSimulations([]);
     setDemoIframeKey(prev => prev + 1);

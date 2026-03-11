@@ -206,8 +206,10 @@ export default function ConsentModal({ walletAddress, onConsent, onCancel }: Con
                 style={{ accentColor: COLORS.red }}
               />
               <span className="text-sm" style={{ color: COLORS.black }}>
-                I confirm that I have <strong style={{ color: COLORS.red }}>extensively tested spatter generation on this device (at least 15 times)</strong> using 
-                the "Generate a new spatter" feature on the landing page, and have <strong style={{ color: COLORS.red }}>NOT experienced any 
+                I confirm that I have <strong style={{ color: COLORS.red }}>extensively tested spatter generation on this device</strong> using 
+                the "Generate a new spatter" feature and the <strong style={{ color: COLORS.red }}>&quot;General &gt; Change aspect ratio&quot;</strong> simulation option on the landing page 
+                as many times as needed until I have seen <strong style={{ color: COLORS.red }}>large height-width aspect ratios render properly</strong> on this device, 
+                which <strong style={{ color: COLORS.red }}>generally requires at least 20 tries</strong>, and have <strong style={{ color: COLORS.red }}>NOT experienced any 
                 browser crashes or performance issues</strong>. I understand that if I have not tested my hardware, I should NOT proceed with minting
               </span>
             </label>
