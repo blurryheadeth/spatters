@@ -64,7 +64,7 @@ HARDWARE AND TECHNICAL REQUIREMENTS:
 
 HARDWARE TESTING CONFIRMATION:
 - I confirm that I have EXTENSIVELY TESTED spatter generation on this device.
-- I have used the "Generate a new spatter" feature and the "General > Change aspect ratio" simulation option on the landing page as many times as needed until I have seen large height-width aspect ratios render properly.
+- I have used the "Generate a new spatter" feature and the "General > Change aspect ratio" mutation simulation option on the landing page as many times as needed until I have seen large height-width aspect ratios render properly.
 - This generally requires at least 20 tries.
 - I have NOT experienced any browser crashes, freezes, or performance issues during testing.
 - I understand that if I have not adequately tested my hardware, I should NOT proceed with minting.
